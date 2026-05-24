@@ -1,0 +1,125 @@
+            {/* 2. Capa de Cartas Activas */}
+            <style>{`
+          @keyframes respiracion {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.12); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+          }
+          @keyframes destello {
+            0% { opacity: 0.2; }
+            50% { opacity: 0.9; }
+            100% { opacity: 0.2; }
+          }
+          @keyframes giroLento {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+          .boton-mas {
+            animation: respiracion 3s ease-in-out infinite, giroLento 12s linear infinite;
+            will-change: transform, opacity;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .boton-respiracion {
+            animation: respiracion 3s ease-in-out infinite;
+            will-change: transform, opacity;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .cartas-brillo {
+            animation: destello 2.5s ease-in-out infinite;
+            will-change: opacity;
+          }
+        `}</style>
+            <div
+              className="rounded-[2rem] p-8 overflow-hidden relative z-10 mt-8"
+              style={{ background: 'url("/Album Mágico/albumBackground.jpeg") center/cover no-repeat' }}
+            >
+              <div className="relative w-full aspect-[3/4] max-w-[400px] mx-auto">
+                {slots.map((slot) => {
+                  const mockupPositionMap = {
+                    1: { top: '35%', left: '66.2%' },
+                    2: { top: '61%', left: '102%' },
+                    3: { top: '103%', left: '93%' },
+                    4: { top: '103.4%', left: '39.4%' },
+                    5: { top: '60.6%', left: '31%' }
+                  };
+                  const pos = mockupPositionMap[slot.slotNum] || { top: '50%', left: '50%' };
+                  const angleMap = { 1: 0, 2: 10, 3: -12, 4: 11, 5: -11 };
+                  const sizeMap = {
+                    1: { w: '98px', h: '154px' },
+                    2: { w: '98px', h: '154px' },
+                    3: { w: '94px', h: '148px' },
+                    4: { w: '94px', h: '148px' },
+                    5: { w: '98px', h: '154px' }
+                  };
+                  const size = sizeMap[slot.slotNum] || { w: '82px', h: '132px' };
+
+                  const hasBg = isClaimed && slot.state === 'filled';
+                  const hasIcon = !isClaimed && slot.state === 'filled';
+
+                  return (
+                    <div
+                      key={slot.id}
+                      onClick={() => ritualPhase === 'idle' && handleSlotClick(slot)}
+                      className="absolute -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[4px] flex items-center justify-center cursor-pointer"
+                      style={{
+                        width: size.w,
+                        height: size.h,
+                        top: pos.top,
+                        left: pos.left,
+                        transform: `translate(-50%, -50%) rotate(${angleMap[slot.slotNum] || 0}deg)`,
+                        border: (hasBg || !hasIcon) ? '2px solid #421D43' : '2px solid rgba(82, 35, 84, 0.6)',
+                        backgroundImage: hasBg ? `url("${slot.image}")` : 'none',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }}
+                    >
+                      {!hasBg && hasIcon && (
+                        <div className="absolute inset-0 border-[4px] border-[#CD97E0] rounded-[4px] cartas-brillo pointer-events-none" />
+                      )}
+                      
+                      {hasBg ? null : hasIcon ? (
+                        <div className="boton-respiracion">
+                          <div
+                            className="w-10 h-10 opacity-80"
+                            style={{
+                              backgroundColor: '#B47FC0',
+                              WebkitMaskImage: `url("${slot.bgSvg}")`,
+                              WebkitMaskSize: 'contain',
+                              WebkitMaskPosition: 'center',
+                              WebkitMaskRepeat: 'no-repeat',
+                              maskImage: `url("${slot.bgSvg}")`,
+                              maskSize: 'contain',
+                              maskPosition: 'center',
+                              maskRepeat: 'no-repeat'
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div className="boton-mas">
+                          <Plus size={32} className="text-[#BEA1B8]" />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Giant Lock Overlay if Page is Locked */}
+                {currentPageData?.state === 'locked' && (
+                  <div className="absolute inset-0 bg-background/55 backdrop-blur-[3px] flex flex-col items-center justify-center rounded-[2rem] z-20">
+                    <motion.div
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="p-6 bg-surface-container-high/85 border border-primary/20 rounded-3xl flex flex-col items-center text-center shadow-2xl max-w-[200px]"
+                    >
+                      <Lock size={36} className="text-primary-fixed mb-3" />
+                      <h3 className="text-sm font-display text-primary-fixed mb-1 uppercase tracking-wider">Bloqueado</h3>
+                      <p className="text-[10px] text-on-surface-variant leading-snug">Se requiere abrir con Polvo Lunar.</p>
+                    </motion.div>
+                  </div>
+                )}
+              </div>
+            </div>

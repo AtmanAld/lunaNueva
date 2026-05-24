@@ -1,0 +1,398 @@
+            {/* 2. Pentáculo Mágico */}
+            {false && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8 }}
+                className="border border-outline-variant/10 rounded-[2rem] p-8 overflow-hidden relative bg-[rgba(30,20,30,0.4)] z-10"
+                style={{ boxShadow: '0 0 30px #4F3348, inset 0 0 20px rgba(79,51,72,0.4)' }}
+              >
+                <div className="relative w-full aspect-[3/4] max-w-[400px] mx-auto">
+                  {/* Líneas del Pentáculo (SVG) */}
+                  <svg
+                    onClick={startClaimRitual}
+                    className={`absolute inset-0 w-full h-full transition-all duration-300 ${isRitualReady && ritualPhase === 'idle'
+                      ? 'opacity-100 pointer-events-auto cursor-pointer'
+                      : isClaimed
+                        ? 'opacity-80 pointer-events-none'
+                        : 'opacity-50 pointer-events-none'
+                      }`}
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                    style={isRitualReady ? {
+                      filter: 'drop-shadow(0 0 8px var(--color-primary, #dcb8ff)) drop-shadow(0 0 16px var(--color-secondary, #ecb9c8))'
+                    } : {}}
+                  >
+                    <style>{`
+                .pentacle-line {
+                  stroke: var(--color-primary, #dcb8ff);
+                  stroke-width: 1.2px;
+                  stroke-linecap: round;
+                  stroke-linejoin: round;
+                }
+                .pentacle-line-bg {
+                  stroke: var(--color-secondary, #ecb9c8);
+                  stroke-width: 2.8px;
+                  stroke-linecap: round;
+                  stroke-linejoin: round;
+                  opacity: 0.35;
+                }
+                @keyframes soft-pulse-pentacle {
+                  0%, 100% { opacity: 0.85; filter: brightness(1); }
+                  50% { opacity: 1; filter: brightness(1.2) drop-shadow(0 0 12px var(--color-primary, #dcb8ff)); }
+                }
+                .ritual-ready-pulse {
+                  animation: soft-pulse-pentacle 2.2s ease-in-out infinite;
+                }
+                .ritual-static-glow {
+                  opacity: 1;
+                  filter: brightness(1.2) drop-shadow(0 0 12px var(--color-primary, #dcb8ff));
+                }
+              `}</style>
+
+                    <g className={isRitualReady ? (ritualPhase === 'idle' ? "ritual-ready-pulse" : "ritual-static-glow") : ""}>
+                      <polygon points="50,11 88,40 80,87 20,87 12,40" fill="none" className="pentacle-line-bg" />
+                      <polygon points="50,13 86,40.8 79,85.2 21,85.2 14,40.8" fill="none" className="pentacle-line-bg" />
+                      <polyline points="50,11 80,87 12,40 88,40 20,87 50,11" fill="none" className="pentacle-line-bg" />
+                      <polyline points="50,13 79,85.2 14,40.8 86,40.8 21,85.2 50,13" fill="none" className="pentacle-line-bg" />
+
+                      <polygon points="50,11 88,40 80,87 20,87 12,40" fill="none" className="pentacle-line" />
+                      <polygon points="50,13 86,40.8 79,85.2 21,85.2 14,40.8" fill="none" className="pentacle-line" />
+                      <polyline points="50,11 80,87 12,40 88,40 20,87 50,11" fill="none" className="pentacle-line" />
+                      <polyline points="50,13 79,85.2 14,40.8 86,40.8 21,85.2 50,13" fill="none" className="pentacle-line" />
+                    </g>
+                  </svg>
+
+
+                  {/* Renderizado de los Slots */}
+                  {slots.map((slot) => {
+                    const posStyle = positionMap[slot.slotNum] || 'top-[50%] left-[50%]';
+                    const isFilled = slot.state === 'filled';
+                    const isSpecial = false;
+
+                    return (
+                      <motion.div
+                        key={slot.id}
+                        onClick={() => ritualPhase === 'idle' && handleSlotClick(slot)}
+                        className={`absolute w-[110px] h-[110px] -translate-x-1/2 -translate-y-1/2 rounded-full border flex flex-col items-center justify-center overflow-hidden ${posStyle} cursor-pointer`}
+                        style={isFilled ? {
+                          backgroundImage: `url("${slot.image}")`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          borderColor: isSpecial ? 'rgba(252, 239, 159, 0.85)' : 'rgba(190, 161, 184, 0.85)',
+                          backgroundColor: '#151219'
+                        } : {
+                          borderColor: isSpecial ? 'rgba(252, 239, 159, 0.45)' : 'rgba(190, 161, 184, 0.45)',
+                          backgroundColor: '#151219'
+                        }}
+                        animate={placingSlotId === slot.id ? {
+                          scale: [1, 1.04, 1.08, 1.05],
+                          borderColor: ['rgba(190, 161, 184, 0.45)', 'rgba(228, 181, 255, 0.8)', 'rgba(251, 181, 255, 1.0)', 'rgba(251, 181, 255, 1.0)'],
+                          boxShadow: [
+                            '0 0 15px rgba(79, 51, 72, 0.5), inset 0 0px rgba(251, 181, 255, 0)',
+                            '0 0 35px rgba(228, 181, 255, 0.65), inset 0 0 20px rgba(228, 181, 255, 0.3)',
+                            '0 0 55px rgba(251, 181, 255, 1.0), inset 0 0 35px rgba(251, 181, 255, 0.6)',
+                            '0 0 55px rgba(251, 181, 255, 1.0), inset 0 0 35px rgba(251, 181, 255, 0.6)'
+                          ]
+                        } : isClaimed ? {
+                          scale: 1,
+                          boxShadow: isSpecial
+                            ? '0 0 10px rgba(252, 239, 159, 0.25), inset 0 0 8px rgba(252, 239, 159, 0.15)'
+                            : '0 0 10px rgba(190, 161, 184, 0.25), inset 0 0 8px rgba(190, 161, 184, 0.15)'
+                        } : isFilled ? (
+                          ritualPhase !== 'idle' ? {
+                            scale: 1,
+                            boxShadow: isSpecial
+                              ? '0 0 20px rgba(252, 239, 159, 0.4), inset 0 0 15px rgba(252, 239, 159, 0.2)'
+                              : '0 0 20px rgba(190, 161, 184, 0.4), inset 0 0 15px rgba(190, 161, 184, 0.2)'
+                          } : {
+                            scale: 1,
+                            boxShadow: isSpecial
+                              ? [
+                                '0 0 20px rgba(252, 239, 159, 0.4), inset 0 0 15px rgba(252, 239, 159, 0.2)',
+                                '0 0 35px rgba(252, 239, 159, 0.75), inset 0 0 25px rgba(252, 239, 159, 0.4)',
+                                '0 0 20px rgba(252, 239, 159, 0.4), inset 0 0 15px rgba(252, 239, 159, 0.2)'
+                              ]
+                              : [
+                                '0 0 20px rgba(190, 161, 184, 0.4), inset 0 0 15px rgba(190, 161, 184, 0.2)',
+                                '0 0 35px rgba(190, 161, 184, 0.75), inset 0 0 25px rgba(190, 161, 184, 0.4)',
+                                '0 0 20px rgba(190, 161, 184, 0.4), inset 0 0 15px rgba(190, 161, 184, 0.2)'
+                              ]
+                          }
+                        ) : {
+                          scale: 1,
+                          boxShadow: '0 0 15px rgba(79, 51, 72, 0.5)'
+                        }}
+                        whileHover={placingSlotId === slot.id ? {} : isClaimed ? {
+                          scale: 1.02,
+                          boxShadow: isSpecial ? '0 0 15px rgba(252, 239, 159, 0.35)' : '0 0 15px rgba(190, 161, 184, 0.3)'
+                        } : {
+                          scale: isFilled ? 1.05 : 1.03,
+                          borderColor: isSpecial ? 'rgba(252, 239, 159, 0.95)' : 'rgba(190, 161, 184, 0.95)',
+                          boxShadow: isSpecial ? '0 0 30px rgba(252, 239, 159, 0.7)' : '0 0 30px rgba(190, 161, 184, 0.6)'
+                        }}
+                        transition={placingSlotId === slot.id ? {
+                          duration: 1.8,
+                          times: [0, 0.4, 0.8, 1.0],
+                          ease: "easeInOut"
+                        } : isClaimed ? {
+                          duration: 0.2
+                        } : isFilled ? {
+                          boxShadow: ritualPhase !== 'idle' ? { duration: 0.2 } : { repeat: Infinity, duration: 3.5, ease: "easeInOut" },
+                          default: { duration: 0.2 }
+                        } : { duration: 0.2 }}
+                      >
+                        {/* Círculo Astrolabio Interior - Gira si está llena */}
+                        <motion.div
+                          className="absolute inset-[3px] rounded-full border border-dashed pointer-events-none z-10"
+                          style={{ borderColor: isSpecial ? 'rgba(252, 239, 159, 0.85)' : 'rgba(190, 161, 184, 0.85)' }}
+                          animate={(isFilled && ritualPhase === 'idle') ? { rotate: 360 } : { rotate: 0 }}
+                          transition={(isFilled && ritualPhase === 'idle') ? { repeat: Infinity, duration: 35, ease: "linear" } : { duration: 0.2 }}
+                        />
+
+                        {/* SVG de fondo mágico */}
+                        {!isFilled && slot.bgSvg && (
+                          <motion.div
+                            className="absolute inset-0 pointer-events-none p-5"
+                            animate={placingSlotId === slot.id ? {
+                              opacity: [0.25, 0.65, 1.0, 1.0],
+                              scale: [1, 1.12, 1.22, 1.12],
+                            } : {
+                              opacity: 0.25,
+                              scale: 1,
+                            }}
+                            transition={placingSlotId === slot.id ? {
+                              duration: 1.8,
+                              times: [0, 0.4, 0.8, 1.0],
+                              ease: "easeInOut"
+                            } : { duration: 0.2 }}
+                            style={{
+                              backgroundColor: placingSlotId === slot.id ? '#FBB5FF' : (isSpecial ? '#FCEF9F' : '#BEA1B8'),
+                              maskImage: `url("${slot.bgSvg}")`,
+                              maskSize: 'contain',
+                              maskPosition: 'center',
+                              maskRepeat: 'no-repeat',
+                              WebkitMaskImage: `url("${slot.bgSvg}")`,
+                              WebkitMaskSize: 'contain',
+                              WebkitMaskPosition: 'center',
+                              WebkitMaskRepeat: 'no-repeat'
+                            }}
+                          />
+                        )}
+
+                        {/* Elemento vacío: Muestra plus */}
+                        {!isFilled && placingSlotId !== slot.id && (
+                          <Plus size={20} className={isSpecial ? "text-[#FCEF9F]/70 z-10" : "text-[#BEA1B8]/70 z-10"} />
+                        )}
+                      </motion.div>
+                    );
+                  })}
+
+                  {/* Giant Lock Overlay if Page is Locked */}
+                  {currentPageData?.state === 'locked' && (
+                    <div className="absolute inset-0 bg-background/55 backdrop-blur-[3px] flex flex-col items-center justify-center rounded-[2rem] z-20">
+                      <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="p-6 bg-surface-container-high/85 border border-primary/20 rounded-3xl flex flex-col items-center text-center shadow-2xl max-w-[200px]"
+                      >
+                        <Lock size={36} className="text-primary-fixed mb-3" />
+                        <h3 className="text-sm font-display text-primary-fixed mb-1 uppercase tracking-wider">Bloqueado</h3>
+                        <p className="text-[10px] text-on-surface-variant leading-snug">Se requiere abrir con Polvo Lunar.</p>
+                      </motion.div>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
+            {/* --- MOCKUP 1: SIN CARTAS (Puro UI) usar en caso de isRitualReady = false --- */}
+            <style>{`
+          @keyframes respiracion {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.12); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+          }
+          @keyframes destello {
+            0% { opacity: 0.2; }
+            50% { opacity: 0.9; }
+            100% { opacity: 0.2; }
+          }
+          @keyframes giroLento {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+          .boton-mas {
+            animation: respiracion 3s ease-in-out infinite, giroLento 12s linear infinite;
+            will-change: transform, opacity;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .boton-respiracion {
+            animation: respiracion 3s ease-in-out infinite;
+            will-change: transform, opacity;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .cartas-brillo {
+            animation: destello 2.5s ease-in-out infinite;
+            will-change: opacity;
+          }
+        `}</style>
+            <div
+              className="rounded-[2rem] p-8 overflow-hidden relative z-10 mt-8"
+              style={{ background: 'url("/Album Mágico/albumBackground.jpeg") center/cover no-repeat' }}
+            >
+              <div className="relative w-full aspect-[3/4] max-w-[400px] mx-auto">
+                {[1, 2, 3, 4, 5].map((slotNum) => {
+                  const mockupPositionMap = {
+                    1: { top: '35%', left: '66.2%' },
+                    2: { top: '61%', left: '102%' },
+                    3: { top: '103%', left: '93%' },
+                    4: { top: '103.4%', left: '39.4%' },
+                    5: { top: '60.6%', left: '31%' }
+                  };
+                  const pos = mockupPositionMap[slotNum] || { top: '50%', left: '50%' };
+                  const angleMap = { 1: 0, 2: 10, 3: -12, 4: 11, 5: -11 };
+                  const iconMap = {
+                    2: "/Album Mágico/1/laArana.svg",
+                  };
+                  const bgMap = {
+                    3: "/Album Mágico/1/laAranaSmall.jpg",
+                  };
+                  const sizeMap = {
+                    1: { w: '98px', h: '154px' },
+                    2: { w: '98px', h: '154px' },
+                    3: { w: '94px', h: '148px' },
+                    4: { w: '94px', h: '148px' },
+                    5: { w: '98px', h: '154px' }
+                  };
+                  const size = sizeMap[slotNum] || { w: '82px', h: '132px' };
+
+                  const hasBg = !!bgMap[slotNum];
+                  const hasIcon = !!iconMap[slotNum];
+
+                  return (
+                    <div
+                      key={slotNum}
+                      className="absolute -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[4px] flex items-center justify-center"
+                      style={{
+                        width: size.w,
+                        height: size.h,
+                        top: pos.top,
+                        left: pos.left,
+                        transform: `translate(-50%, -50%) rotate(${angleMap[slotNum] || 0}deg)`,
+                        border: (hasBg || !hasIcon) ? '2px solid #421D43' : '2px solid rgba(82, 35, 84, 0.6)',
+                        backgroundImage: hasBg ? `url("${bgMap[slotNum]}")` : 'none',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }}
+                    >
+                      {!hasBg && hasIcon && (
+                        <div className="absolute inset-0 border-[4px] border-[#CD97E0] rounded-[4px] cartas-brillo pointer-events-none" />
+                      )}
+
+                      {hasBg ? null : hasIcon ? (
+                        <div className="boton-respiracion">
+                          <div
+                            className="w-10 h-10 opacity-80"
+                            style={{
+                              backgroundColor: '#B47FC0',
+                              WebkitMaskImage: `url("${iconMap[slotNum]}")`,
+                              WebkitMaskSize: 'contain',
+                              WebkitMaskPosition: 'center',
+                              WebkitMaskRepeat: 'no-repeat',
+                              maskImage: `url("${iconMap[slotNum]}")`,
+                              maskSize: 'contain',
+                              maskPosition: 'center',
+                              maskRepeat: 'no-repeat'
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div className="boton-mas">
+                          <Plus size={32} className="text-[#BEA1B8]" />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* --- MOCKUP 2: FULL CARTAS (Puro UI) usar en caso de isRitualReady = true --- */}
+            {false && (
+              <div
+                className="rounded-[2rem] p-8 overflow-hidden relative z-10 mt-8"
+                style={{ background: 'url("/Album Mágico/albumBackground.jpeg") center/cover no-repeat' }}
+              >
+                <div className="relative w-full aspect-[3/4] max-w-[400px] mx-auto">
+                  {slots.map((slot) => {
+                    const mockupPositionMap = {
+                      1: { top: '34.3%', left: '65.8%' },
+                      2: { top: '61.4%', left: '103%' },
+                      3: { top: '104.2%', left: '94%' },
+                      4: { top: '104.2%', left: '38.6%' },
+                      5: { top: '61%', left: '29.6%' }
+                    };
+                    const pos = mockupPositionMap[slot.slotNum] || { top: '50%', left: '50%' };
+                    const angleMap = { 1: 0, 2: 11, 3: -11, 4: 11, 5: -10 };
+                    const sizeMap = {
+                      1: { w: '82px', h: '132px' },
+                      2: { w: '82px', h: '132px' },
+                      3: { w: '82px', h: '126px' }, // Ajusta aquí el tamaño para la carta 3
+                      4: { w: '82px', h: '126px' }, // Ajusta aquí el tamaño para la carta 4
+                      5: { w: '82px', h: '132px' }
+                    };
+                    const size = sizeMap[slot.slotNum] || { w: '82px', h: '132px' };
+                    const iconMap = {
+                      1: "/Album Mágico/1/elGato.svg",
+                      2: "/Album Mágico/1/laArana.svg",
+                      3: "/Album Mágico/1/escobaDeBruja.svg",
+                      4: "/Album Mágico/1/crecienteLunar.svg",
+                      5: "/Album Mágico/1/leMat.svg"
+                    };
+
+                    return (
+                      <div
+                        key={slot.id}
+                        className="absolute -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[4px] flex items-center justify-center"
+                        style={{
+                          width: size.w,
+                          height: size.h,
+                          top: pos.top,
+                          left: pos.left,
+                          transform: `translate(-50%, -50%) rotate(${angleMap[slot.slotNum] || 0}deg)`,
+                          backgroundImage: slot.state === 'filled' ? `url("${slot.image}")` : 'none',
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          border: slot.state === 'filled' ? 'none' : '2px solid rgba(82, 35, 84, 0.6)'
+                        }}
+                      >
+                        <div className="absolute inset-0 border-[4px] border-[#CD97E0] rounded-[4px] cartas-brillo pointer-events-none" />
+                        {iconMap[slot.slotNum] && (
+                          <div className="boton-respiracion">
+                            <div
+                              className="w-10 h-10 opacity-80"
+                              style={{
+                                backgroundColor: '#B47FC0',
+                                WebkitMaskImage: `url("${iconMap[slot.slotNum]}")`,
+                                WebkitMaskSize: 'contain',
+                                WebkitMaskPosition: 'center',
+                                WebkitMaskRepeat: 'no-repeat',
+                                maskImage: `url("${iconMap[slot.slotNum]}")`,
+                                maskSize: 'contain',
+                                maskPosition: 'center',
+                                maskRepeat: 'no-repeat'
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}

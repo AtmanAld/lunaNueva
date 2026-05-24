@@ -1,0 +1,153 @@
+export const activityCatalog = [
+  // --- SET 1: Antes del desayuno ---
+  {
+    activityID: 1,
+    setID: 1,
+    title: "Tomar pastillas",
+    category: "Wellness",
+    value: 1,
+    valueUnit: "toma",
+    stars: 15,
+    maxCompletions: 1,
+    intervalCompletions: 1,
+    intervalName: "al día",
+    activityDetails: "Toma tus pastillas diarias como esté indicado.",
+    phasePoints: 4
+  },
+  {
+    activityID: 2,
+    setID: 1,
+    title: "Usar bicicleta",
+    category: "Ejercicio",
+    value: 1,
+    valueUnit: "sesión",
+    stars: 50,
+    maxCompletions: 1,
+    intervalCompletions: 1,
+    intervalName: "al día",
+    activityDetails: "Sal a montar en bicicleta para hacer cardio y despejar la mente.",
+    phasePoints: 8
+  },
+  {
+    activityID: 3,
+    setID: 1,
+    title: "Ver tiktoks",
+    category: "Recreación",
+    value: 1,
+    valueUnit: "sesión",
+    stars: 10,
+    maxCompletions: 1,
+    intervalCompletions: 1,
+    intervalName: "al día",
+    activityDetails: "Disfruta un rato viendo videos cortos en TikTok.",
+    phasePoints: 2
+  },
+
+  // --- SET 2: Medio día ---
+  {
+    activityID: 4,
+    setID: 2,
+    title: "Hacer comida",
+    category: "Preparación",
+    value: 1,
+    valueUnit: "vez",
+    stars: 50,
+    maxCompletions: 1,
+    intervalCompletions: 1,
+    intervalName: "al día",
+    activityDetails: "Prepara una comida saludable en casa.",
+    phasePoints: 10
+  },
+  {
+    activityID: 5,
+    setID: 2,
+    title: "Ir a cobrar",
+    category: "Finanzas",
+    value: 1,
+    valueUnit: "vez",
+    stars: 30,
+    maxCompletions: 1,
+    intervalCompletions: 28,
+    intervalName: "al mes",
+    activityDetails: "Realiza tus cobros o transacciones financieras pendientes.",
+    phasePoints: 5
+  },
+  {
+    activityID: 6,
+    setID: 2,
+    title: "Lavar la ropa",
+    category: "Limpieza",
+    value: 1,
+    valueUnit: "vez",
+    stars: 40,
+    maxCompletions: 1,
+    intervalCompletions: 6,
+    intervalName: "a la semana",
+    activityDetails: "Lava y organiza tu ropa de la semana.",
+    phasePoints: 6
+  },
+  {
+    activityID: 7,
+    setID: 2,
+    title: "Jugar (celular o pc)",
+    category: "Recreación",
+    value: 1,
+    valueUnit: "sesión",
+    stars: 10,
+    maxCompletions: 1,
+    intervalCompletions: 1,
+    intervalName: "al día",
+    activityDetails: "Dedica un tiempo a jugar tu videojuego favorito.",
+    phasePoints: 3
+  },
+
+  // --- SET 3: Por la tarde ---
+  {
+    activityID: 8,
+    setID: 3,
+    title: "Colorear carta de tarot",
+    category: "Creatividad",
+    value: 1,
+    valueUnit: "vez",
+    stars: 40,
+    maxCompletions: 1,
+    intervalCompletions: 1,
+    intervalName: "al día",
+    activityDetails: "Pinta o diseña tu carta de Tarot para reconectar con tu lado artístico.",
+    phasePoints: 10
+  },
+  {
+    activityID: 9,
+    setID: 3,
+    title: "Subir video a tiktok",
+    category: "Creatividad",
+    value: 1,
+    valueUnit: "video",
+    stars: 30,
+    maxCompletions: 1,
+    intervalCompletions: 1,
+    intervalName: "al día",
+    activityDetails: "Graba, edita y sube un video a tu canal de TikTok.",
+    phasePoints: 7
+  },
+  {
+    activityID: 10,
+    setID: 3,
+    title: "Dormir antes de la 1:00 am",
+    category: "Wellness",
+    value: 1,
+    valueUnit: "noche",
+    stars: 20,
+    maxCompletions: 1,
+    intervalCompletions: 1,
+    intervalName: "al día",
+    activityDetails: "Duérmete a una hora adecuada para cuidar tu ciclo de sueño.",
+    phasePoints: 6
+  }
+];
+
+export const activitySetsCatalog = [
+  { id: 1, name: "Antes del desayuno", description: "Actividades para enfocar tu mañana", price: 200, specialRewards: 50 },
+  { id: 2, name: "Medio día", description: "Actividades para después del desayuno", price: 200, specialRewards: 50 },
+  { id: 3, name: "Por la tarde", description: "Actividades para hacer por la tarde y noche", price: 200, specialRewards: 50 },
+];

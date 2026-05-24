@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: 'Noto Serif', serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+
+  /* Backgrounds & Surfaces */
+  --color-background: #151219;
+  --color-surface: #151219;
+  --color-surface-dim: #151219;
+  --color-surface-bright: #3c3840;
+  --color-surface-container-lowest: #100d14;
+  --color-surface-container-low: #1d1a22;
+  --color-surface-container: #231f27;
+  --color-surface-container-high: #2c2830;
+  --color-surface-container-highest: #37333b;
+  --color-surface-variant: #37333b;
+
+  /* Primary Palette */
+  --color-primary: #dcb8ff;
+  --color-primary-container: #301050;
+  --color-primary-fixed: #f0dbff;
+  --color-primary-fixed-dim: #dcb8ff;
+  --color-on-primary: #402160;
+  --color-on-primary-container: #9d7bc0;
+  --color-on-primary-fixed: #2a0749;
+
+  /* Secondary Palette */
+  --color-secondary: #ecb9c8;
+  --color-secondary-container: #643e4b;
+  --color-secondary-fixed: #ffd9e3;
+  --color-secondary-fixed-dim: #ecb9c8;
+  --color-on-secondary: #482632;
+  --color-on-secondary-container: #ddabba;
+
+  /* Tertiary Palette */
+  --color-tertiary: #cec2d4;
+  --color-tertiary-container: #261f2c;
+  --color-tertiary-fixed: #ebdef0;
+  --color-tertiary-fixed-dim: #cec2d4;
+  --color-on-tertiary: #352e3b;
+  --color-on-tertiary-container: #8f8696;
+
+  /* Errors & Outlines */
+  --color-error: #ffb4ab;
+  --color-error-container: #93000a;
+  --color-on-error: #690005;
+  --color-on-error-container: #ffdad6;
+  --color-outline: #978e96;
+  --color-outline-variant: #4b454b;
+  
+  /* Neutral & Text */
+  --color-on-surface: #e8e0ea;
+  --color-on-surface-variant: #cec4cc;
+  --color-on-background: #e8e0ea;
+  
+  /* Inverse */
+  --color-inverse-surface: #e8e0ea;
+  --color-inverse-on-surface: #332f37;
+  --color-inverse-primary: #705091;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-on-surface font-body antialiased;
+  }
+  
+  /* Celestial Nocturne hierarchy: Display & Headlines = Serif. Titles & Body = Sans. */
+  h1, h2, h3 {
+    @apply font-display text-on-surface;
+  }
+  
+  h4, h5, h6 {
+    @apply font-body font-medium text-on-surface;
+  }
+}
+
+@layer utilities {
+  @keyframes float-element {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .animate-float-element {
+    animation: float-element 4s ease-in-out infinite;
+  }
+
+  @keyframes pulse-halo {
+    0%, 100% { transform: scale(1); opacity: 0.2; }
+    50% { transform: scale(1.4); opacity: 0.8; }
+  }
+  .animate-pulse-halo {
+    animation: pulse-halo 1.5s ease-out;
+  }
+
+  /* --- BADGES DE INVENTARIO (LIMPIO) --- */
+  .inventory-badge {
+    @apply absolute -top-1 -right-1 w-5 h-5 rounded-full border border-white/10 flex items-center justify-center text-[10px] font-bold shadow-lg z-10 transition-all duration-300;
+    background-color: var(--color-surface-container-highest);
+    color: var(--color-on-surface);
+  }
+
+  .inventory-badge.is-empty {
+    background-color: rgb(130, 109, 152) !important;
+    color: white;
+  }
+}
+
+/* --- AJUSTES DE MAQUETACIÓN PARA EL ÁLBUM (CORRECCIÓN DE ESPACIOS DE LA PAGINACIÓN) --- */
+.aspect-\[3\/4\] {
+  aspect-ratio: 1 / 1.18 !important; /* Hace que el pentágono sea un poco más compacto verticalmente */
+}
+
+/* Reducir el padding de la tarjeta contenedora del pentáculo */
+div:has(> .aspect-\[3\/4\]) {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+}
+
+/* Reducir el espacio de separación (space-y-8) entre la tarjeta y la paginación */
+div:has(> .aspect-\[3\/4\]) + div {
+  margin-top: 1rem !important;
+}
+
+/* Corregir el margen superior duplicado dentro del componente de paginación */
+.flex.items-center.justify-center.gap-6.mt-8 {
+  margin-top: 0.5rem !important;
+}
+
