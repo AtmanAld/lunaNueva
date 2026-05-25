@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+:root {
+  color-scheme: dark;
+}
+
 @theme {
   --font-display: 'Noto Serif', serif;
   --font-body: 'Plus Jakarta Sans', sans-serif;
