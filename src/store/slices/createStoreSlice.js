@@ -30,7 +30,7 @@ export const createStoreSlice = (set, get) => ({
     }
   },
 
-  categories: ["Mascota", "Album", "Actividad"],
+  categories: ["Mascota", "Magia", "Actividad"],
   catalog: [
     {
       id: 'agua',
@@ -72,7 +72,7 @@ export const createStoreSlice = (set, get) => ({
       chips: ['Nivel 1', 'Divierte 10 horas'],
       payload: { targetsNeed: 'play', amount: 10, quantity: 1, rewardStars: 4, idleReward: 2 }
     },
-    { id: 'polvo_lunar', name: 'Polvo Lunar', icon: '✨', price: 180, category: 'Album', description: 'Polvo mágico para desbloquear casillas especiales o nuevas páginas.', chips: ['Premium', '1 uso', 'Funcional'], payload: { type: 'UNLOCK_TOOL' } }
+    { id: 'polvo_lunar', name: 'Polvo Lunar', icon: '✨', price: 180, category: 'Magia', description: 'Polvo mágico para desbloquear casillas especiales o nuevas páginas.', chips: ['Premium', '1 uso', 'Funcional'], payload: { type: 'UNLOCK_TOOL' } }
   ],
   purchaseItem: (productId, quantity = 1) => {
     const state = get();
@@ -112,7 +112,7 @@ export const createStoreSlice = (set, get) => ({
     if (product.category === 'Mascota') {
       state.addPetItem(purchasedProduct);
       state.setEphemeralMessage("SPIRAL_FELIZ");
-    } else if (product.category === 'Album') {
+    } else if (product.category === 'Magia') {
       state.addCardToInventory(purchasedProduct);
       state.setEphemeralMessage("SPIRAL_FELIZ");
     } else {

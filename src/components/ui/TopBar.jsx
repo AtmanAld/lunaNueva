@@ -6,6 +6,7 @@ import { useGameStore } from '../../store/useGameStore';
 export function TopBar() {
   const userStars = useGameStore(state => state.userStars);
   const userName = useGameStore(state => state.userName);
+  const userAvatar = useGameStore(state => state.userAvatar);
   const moonPhaseName = useGameStore(state => state.moonPhase?.name);
   const isMoonCelebrationActive = useGameStore(state => state.isMoonCelebrationActive);
 
@@ -24,8 +25,12 @@ export function TopBar() {
     >
       {/* Lado Izquierdo: Avatar (Link al Perfil) y Nombre */}
       <Link to="/profile" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-container to-surface-container-high border justify-center items-center flex border-primary/30 shadow-[0_0_8px_rgba(220,184,255,0.2)]">
-          <span className="text-sm">🌌</span>
+        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-container to-surface-container-high border justify-center items-center flex border-primary/30 shadow-[0_0_8px_rgba(220,184,255,0.2)] overflow-hidden">
+          {userAvatar ? (
+            <img src={userAvatar} alt="Avatar" className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-sm">🌌</span>
+          )}
         </div>
         <span className="font-display font-medium text-on-surface">{userName}</span>
       </Link>

@@ -87,14 +87,7 @@ export const createAlbumSlice = (set, get) => ({
       rewards: null
     }
   }),
-  pendingPlacementCard: { 
-    id: 3, 
-    pageId: 1, 
-    slotNum: 3, 
-    title: 'El Gato Místico', 
-    image: '/Album Mágico/1/elGato.jpg', 
-    bgSvg: '/Album Mágico/1/elGato.svg' 
-  },
+  pendingPlacementCard: null,
   pages: [
     { 
       id: 1, 

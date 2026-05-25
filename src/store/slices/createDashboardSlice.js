@@ -15,7 +15,7 @@ export const createDashboardSlice = (set, get) => ({
   hasMoonBeenRenewedToday: false,
   pendingPhaseReward: null,
   clearPendingPhaseReward: () => set({ pendingPhaseReward: null }),
-  lastResetDate: "2024-01-01",
+  lastResetDate: getLocalDateString(),
   pendingNavigation: null, // Sistema de navegación limpia desde el Store
   // El estado solo guarda lo que CAMBIA (progreso y personalización)
   activitySets: activitySetsCatalog.map(s => ({ id: s.id, isUnlocked: true, isActive: true })),

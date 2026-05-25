@@ -304,7 +304,7 @@ export function SpiralPetPage() {
       </motion.div>
 
       <div className="relative z-20 flex-1 flex flex-col items-center justify-start text-center w-full min-h-[8rem] pointer-events-none mt-1.5">
-        <h2 className="text-xl sm:text-2xl text-primary-fixed mb-2 drop-shadow-[0_0_24px_rgba(220,184,255,0.3)] italic font-display tracking-tight leading-none">Spiral</h2>
+        <h2 className="text-xl sm:text-2xl text-primary-fixed mb-5 drop-shadow-[0_0_24px_rgba(220,184,255,0.3)] italic font-display tracking-tight leading-none">Spiral</h2>
 
         <div className="flex flex-col items-center justify-center gap-1 pointer-events-auto w-full">
           <SpiralMessage
