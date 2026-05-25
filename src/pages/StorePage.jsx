@@ -73,9 +73,25 @@ export function StorePage() {
     }
   }, [buyStep, selectedProduct, activeCategory]);
 
-  // Alerta local (no lo necesitamos si usamos global setPurchaseState, solo actualizamos UI)
-  const setPurchaseQuantityLocal = (qty) => {
-    setPurchaseState(buyStep, selectedProduct, qty);
+  // Alerta local: Controla el aumento circular de la cantidad
+  const setPurchaseQuantityLocal = (newQty) => {
+    if (!selectedProduct) return;
+
+    // 1. Regla de límite de stock (Máximo 10 a la vez)
+    if (newQty > 10) {
+      setPurchaseState(buyStep, selectedProduct, 1);
+      return;
+    }
+
+    // 2. Regla de presupuesto (No permitir si no alcanza)
+    const nextPrice = selectedProduct.price * newQty;
+    if (globalStars < nextPrice) {
+      setPurchaseState(buyStep, selectedProduct, 1);
+      return;
+    }
+
+    // Si pasa ambas pruebas, guarda la cantidad
+    setPurchaseState(buyStep, selectedProduct, newQty);
   };
 
   const handleBuyIntent = (item) => {
