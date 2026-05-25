@@ -225,9 +225,9 @@ export function StorePage() {
       <PageDepthWrapper isActive={buyStep !== 'idle'} className="p-6 pt-6 pb-32 space-y-8 relative">
 
         {/* 1. Header Global Enmarcado */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <GlassCard 
             elevation="low" 
+            delay={0}
             className="p-6 py-5 text-center bg-surface-container-low border border-primary/10 rounded-[2rem] shadow-[0_12px_40px_rgba(0,0,0,0.4)] relative overflow-hidden"
           >
             <div className="relative z-10">
@@ -239,7 +239,6 @@ export function StorePage() {
               </p>
             </div>
           </GlassCard>
-        </motion.div>
 
         {/* 2. Chips de Filtro */}
         <div className="flex justify-center gap-3 pb-2">
@@ -263,7 +262,7 @@ export function StorePage() {
               elevation="low"
               delay={0.2 + (i * 0.05)}
               onClick={() => handleBuyIntent(item)}
-              className="cursor-pointer group flex flex-col p-3 border border-outline-variant/10 shadow-[0_4px_16px_rgba(0,0,0,0.2)] h-full hover:bg-surface-container hover:border-primary/20 transition-all"
+              className="cursor-pointer group flex flex-col p-3 border border-outline-variant/10 shadow-[0_4px_16px_rgba(0,0,0,0.2)] h-full hover:bg-surface-container hover:border-primary/20 transition-colors"
             >
               {/* Inner Square Placeholder */}
               <div className="w-full aspect-[1/1.1] bg-surface-container-lowest rounded-xl flex items-center justify-center relative mb-4 shadow-[0_2px_8px_rgba(0,0,0,0.3)_inset] overflow-hidden group-hover:shadow-[0_4px_16px_rgba(220,184,255,0.1)_inset] transition-shadow">

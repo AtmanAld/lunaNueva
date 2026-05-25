@@ -61,6 +61,8 @@ export function SpiralPetPage() {
   }, []);
 
   const backgroundSpiral = useMemo(() => {
+    let result = null;
+
     // Prioridad 1 Local: Mensaje de confirmación on-demand (Botones)
     if (onDemandBg) {
       const entry = spiralCatalog[onDemandBg.id];
@@ -77,12 +79,12 @@ export function SpiralPetPage() {
             : ac.data
         })) || [];
 
-        return { ...entry, id: onDemandBg.id, text, actionConfig };
+        result = { ...entry, id: onDemandBg.id, text, actionConfig };
       }
     }
 
     // Prioridad 2: Recompensa pendiente (Si salimos sin cobrar, nos espera)
-    if (pendingReward) {
+    else if (!result && pendingReward) {
       const entry = spiralCatalog[pendingReward.type];
       if (entry) {
         let text = Array.isArray(entry.text) ? entry.text[Math.floor(Math.random() * entry.text.length)] : entry.text;
@@ -92,12 +94,12 @@ export function SpiralPetPage() {
           ...ac,
           data: typeof ac.data === 'string' ? ac.data.replace('{{stars}}', pendingReward.stars) : ac.data
         })) || [];
-        return { ...entry, id: pendingReward.type, text, actionConfig };
+        result = { ...entry, id: pendingReward.type, text, actionConfig };
       }
     }
 
     // Prioridad 3: Estrellas Idle acumuladas
-    if (totalIdleStars > 0) {
+    else if (!result && totalIdleStars > 0) {
       const entry = spiralCatalog["IDLE_REWARDS"];
       if (entry) {
         let text = Array.isArray(entry.text) ? entry.text[Math.floor(Math.random() * entry.text.length)] : entry.text;
@@ -107,16 +109,23 @@ export function SpiralPetPage() {
           ...ac,
           data: typeof ac.data === 'string' ? ac.data.replace('{{stars}}', totalIdleStars) : ac.data
         })) || [];
-        return { ...entry, id: "IDLE_REWARDS", text, actionConfig };
+        result = { ...entry, id: "IDLE_REWARDS", text, actionConfig };
       }
     }
 
     // Prioridad 4: Necesidades de Spiral (Fondo Normal Ambiental)
-    const entry = spiralCatalog[ambientId];
-    if (entry) {
-      let text = Array.isArray(entry.text) ? entry.text[Math.floor(Math.random() * entry.text.length)] : entry.text;
-      text = text.replace(/\{\{userName\}\}/g, useGameStore.getState().userName || "Amelia");
-      return { ...entry, id: ambientId, text };
+    if (!result) {
+      const entry = spiralCatalog[ambientId];
+      if (entry) {
+        let text = Array.isArray(entry.text) ? entry.text[Math.floor(Math.random() * entry.text.length)] : entry.text;
+        result = { ...entry, id: ambientId, text };
+      }
+    }
+
+    if (result) {
+      // Reemplazar {{userName}} para CUALQUIER prioridad
+      result.text = result.text.replace(/\{\{userName\}\}/g, useGameStore.getState().userName || "Amelia");
+      return result;
     }
 
     return null;

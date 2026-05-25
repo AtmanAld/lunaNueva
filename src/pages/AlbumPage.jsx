@@ -210,16 +210,11 @@ export function AlbumPage() {
         <div className="absolute top-0 left-0 w-full p-6 pt-8 z-20 pointer-events-none">
           <div className="pointer-events-auto">
             {/* 1. Header Global */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
               <GlassCard
                 elevation="low"
-                className="h-[86px] flex flex-col justify-center px-6 py-3 text-center border border-primary/10 rounded-[2rem] shadow-[0_12px_40px_rgba(0,0,0,0.4)] relative overflow-hidden header-ui-fadeout transition-opacity duration-[1400ms]"
+                delay={0}
+                className="h-[86px] flex flex-col justify-center px-6 py-3 text-center border border-primary/10 rounded-[2rem] shadow-[0_12px_40px_rgba(0,0,0,0.4)] relative overflow-hidden header-ui-fadeout"
               >
-
                 {pendingPlacementCard ? (
                   <div className="relative z-10 flex items-center gap-3.5 text-left w-full">
                     {/* Glowing Thumbnail */}
@@ -260,7 +255,6 @@ export function AlbumPage() {
                   </div>
                 )}
               </GlassCard>
-            </motion.div>
           </div>
         </div>
 

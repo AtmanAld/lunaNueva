@@ -107,7 +107,19 @@ export const hydrateStoreFromSupabase = async (userId) => {
       const catalog = useGameStore.getState().catalog || [];
       stateToUpdate.petInventory = stateToUpdate.petInventory.map(invItem => {
          const catItem = catalog.find(c => c.id === invItem.id);
-         return catItem ? { ...catItem, quantity: invItem.quantity } : invItem;
+         if (catItem) {
+           return {
+             id: catItem.id,
+             name: catItem.name,
+             icon: catItem.icon,
+             quantity: invItem.quantity,
+             targetsNeed: catItem.payload?.targetsNeed,
+             amount: catItem.payload?.amount,
+             rewardStars: catItem.payload?.rewardStars,
+             idleReward: catItem.payload?.idleReward
+           };
+         }
+         return invItem;
       });
     }
 

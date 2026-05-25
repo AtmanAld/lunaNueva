@@ -461,9 +461,9 @@ export const spiralCatalog = {
 
   "MOON_REWARD_CLAIMED": {
     text: [
-      "¡Miau! Completamos el ritual y reclamamos la esencia de esta luna. ¡Buen trabajo, Amelia! 🌕🐾",
+      "¡Miau! Completamos el ritual y reclamamos la esencia de esta luna. ¡Buen trabajo, {{userName}}! 🌕🐾",
       "¡Prrr! El dinero del ritual está seguro en tu perfil. La magia se ha sellado con éxito. 🪙✨",
-      "Miau... El pentáculo ha descansado tras liberar su energía. Amelia, eres una gran bruja. 🔮💜",
+      "Miau... El pentáculo ha descansado tras liberar su energía. {{userName}}, eres una gran bruja. 🔮💜",
       "¡Meow! Los $300 ya están en tus manos. La luna está contenta con nuestra ofrenda. 🌙✨",
       "¡Prrr! Siento la paz en el álbum ahora que la magia del ritual se ha asentado. 🌸🐱",
       "¡Miau! El sello de la Triple Diosa brilla en el centro. ¡Página completada y cobrada! 📖🪙",
@@ -676,7 +676,7 @@ export const spiralCatalog = {
       "¡Miau! Todo vacío por aquí. ¿Esconderá secretos de sardinas o portales estelares? 🐟🪐",
       "¡Prrr! Una página en blanco... ¿será sobre gatos intergalácticos o sobre siestas? 💤✨",
       "¡Meow! Cero recuerdos por aquí. Mi instinto dice que algo mágico va a pasar. 🔮🐱",
-      "¡Amelia! Esta página está tan limpia como mi pelaje. ¡A llenarla de magia! ✨📖",
+      "¡{{userName}}! Esta página está tan limpia como mi pelaje. ¡A llenarla de magia! ✨📖",
       "¡Uy! Esto está más vacío que mi plato de comida a las 3 AM. ¡A trabajar! 🙀🐾"
     ],
     video: "assets/videos/spiral_message.mp4",
@@ -721,7 +721,7 @@ export const spiralCatalog = {
       "¡Prrr! Cuatro tarjetas listas. ¡Una más y el ritual estará completo! 🌟🔮",
       "¡Meow! ¡Cuatro de cinco! Casi puedo oler la recompensa final... 😸",
       "¡Increíble! Cuatro portales encendidos. ¡La magia final ya viene! 🪐✨",
-      "¡Amelia, cuatro tarjetas listas! Estamos a un suspiro de completarlo. 💖👁️"
+      "¡{{userName}}, cuatro tarjetas listas! Estamos a un suspiro de completarlo. 💖👁️"
     ],
     video: "assets/videos/spiral_message.mp4",
     duration: 4000
@@ -735,7 +735,7 @@ export const spiralCatalog = {
   },
   "IDLE_REWARDS": {
     text: [
-      "¡Amelia! Mágicamente encontré {{stars}} ⭐ atrapando pelusas por ahí. Creo que me siento fantástico hoy. ✨",
+      "¡{{userName}}! Mágicamente encontré {{stars}} ⭐ atrapando pelusas por ahí. Creo que me siento fantástico hoy. ✨",
       "¡Sorpresa! Estaba tan a gusto que estas {{stars}} ⭐ simplemente aparecieron. ¿Magia cósmica o soy un genio? 😼",
       "Prrr... Me dejaste tan bien cuidado que hasta tuve energía para cazar {{stars}} ⭐ para ti. ¡De nada! 🌟",
       "¡Mira lo que encontré! {{stars}} ⭐ brillantes. Me siento tan alegre que casi no quiero rasguñar nada hoy. 😸",
@@ -796,7 +796,7 @@ export const spiralCatalog = {
       "Miau... mi intuición felina dice que ahí no es. ¡Intenta de nuevo! 🐾",
       "¡Mec! Respuesta equivocada. Pero no te preocupes, ¡sigue buscando! 🔍😸",
       "Ese altar no parece resonar con esta carta. ¡Prueba en el siguiente! 🔮",
-      "¡Cerca! Pero la magia fluye en otra dirección, Amelia. 🌙",
+      "¡Cerca! Pero la magia fluye en otra dirección, {{userName}}. 🌙",
       "Esa casilla y esta carta se repelen como dos imanes del mismo polo. ¡Otra vez! 🧲🐈",
       "¡Ups! Parece que las estrellas no se alinearon en ese espacio. 🌟😅",
       "Mmmm... no. ¡Pero el que no arriesga no gana! Prueba otro. 🐾🐾",
@@ -903,12 +903,12 @@ export const spiralCatalog = {
       "Prrr... Siento la energía residual de las estrellas que cosechamos en esta página. ✨🐱",
       "¡Meow! Las cartas de esta página ya entregaron su tributo de $300 a tu monedero. 🪙🐾",
       "Miau... El pentáculo de la página {{pageNum}} está consagrado y en paz. ¡Una gran colección! 🔮💜",
-      "¡Prrr! Amelia, la magia de esta página ya fue cosechada. Mírale el centro. 🌸✨",
+      "¡Prrr! {{userName}}, la magia de esta página ya fue cosechada. Mírale el centro. 🌸✨",
       "¡Meow! La Triple Diosa protege esta sección del álbum. Nada más que cobrar aquí. 🌙📖",
       "Prrr... Este capítulo cósmico está completo y el oro a buen resguardo. 🪙🐾",
       "¡Miau! Las casillas descansan bajo un manto de plata. Qué bonita se ve completa. 🌌✨",
       "¡Meow! Siento el ronroneo del universo al contemplar esta página terminada. 😸🌟",
-      "Miau... La abundancia ya fluye en tu cuenta, Amelia. ¡A por la siguiente página! 💸💫"
+      "Miau... La abundancia ya fluye en tu cuenta, {{userName}}. ¡A por la siguiente página! 💸💫"
     ],
     video: "assets/videos/spiral_message.mp4",
     duration: 4000
