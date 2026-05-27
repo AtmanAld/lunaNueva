@@ -511,7 +511,7 @@ export function AlbumPage() {
                     {/* Requisito 1: Página anterior completa */}
                     <GlassCard
                       elevation={isPrevComplete ? "lowest" : "low"}
-                      className={`p-3.5 flex items-center justify-between transition-all duration-500 relative border backdrop-blur-lg rounded-2xl ${isPrevComplete
+                      className={`p-3.5 flex items-center justify-between transition-colors duration-500 relative border backdrop-blur-lg rounded-2xl ${isPrevComplete
                         ? 'border-primary/20 opacity-80 !bg-surface-container-lowest/40'
                         : 'border-transparent !bg-surface-container-low/40'
                         }`}
@@ -562,7 +562,7 @@ export function AlbumPage() {
                     {/* Requisito 2: Polvo lunar */}
                     <GlassCard
                       elevation={hasUnlockItem ? "lowest" : "low"}
-                      className={`p-3.5 flex items-center justify-between transition-all duration-500 relative border backdrop-blur-lg rounded-2xl ${hasUnlockItem
+                      className={`p-3.5 flex items-center justify-between transition-colors duration-500 relative border backdrop-blur-lg rounded-2xl ${hasUnlockItem
                         ? 'border-primary/20 opacity-80 !bg-surface-container-lowest/40'
                         : 'border-transparent !bg-surface-container-low/40'
                         }`}

@@ -570,7 +570,7 @@ export function DashboardPage() {
             duration: 0.6,
             ease: "easeInOut"
           }}
-          className={`mb-8 mt-2 space-y-1 relative mix-blend-plus-lighter z-10 text-center transition-all duration-500 ${isHidingUI ? 'pointer-events-none' : ''}`}
+          className={`mb-8 mt-2 space-y-1 relative mix-blend-plus-lighter z-10 text-center ${isHidingUI ? 'pointer-events-none' : ''}`}
         >
           <h1 className="text-lg sm:text-xl font-display text-primary drop-shadow-[0_0_12px_rgba(220,184,255,0.4)] leading-tight tracking-wide">
             {globalMoonPhase.name}
@@ -699,7 +699,7 @@ export function DashboardPage() {
             duration: 0.6,
             ease: "easeInOut"
           }}
-          className={`space-y-6 relative z-10 transition-all duration-500 ${isHidingUI ? 'pointer-events-none' : ''}`}
+          className={`space-y-6 relative z-10 ${isHidingUI ? 'pointer-events-none' : ''}`}
         >
           {freeActivities.map((act, i) => {
             const isSpecial = act.type === 'special';
