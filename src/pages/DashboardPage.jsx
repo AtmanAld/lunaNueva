@@ -16,6 +16,7 @@ const ICON_MAP = {
 
 // --- ZUSTAND STORE ---
 import { useGameStore } from '../store/useGameStore';
+import { selectActiveMessage } from '../store/slices/createMessageSlice';
 import { spiralCatalog } from '../data/spiralCatalog';
 import { activityCatalog } from '../data/activityCatalog';
 import { getLocalDateString, isChronologicallyNewDay } from '../utils/dateUtils';
@@ -168,10 +169,9 @@ export function DashboardPage() {
   const hasMoonBeenRenewedToday = useGameStore(state => state.hasMoonBeenRenewedToday);
   const isDayTransitioning = useGameStore(state => state.isDayTransitioning);
   const toggleActivity = useGameStore(state => state.toggleActivity);
-  const spiralMessage = useGameStore(state => state.spiralMessage);
-  const clearSpiralMessage = useGameStore(state => state.clearSpiralMessage);
-  const ephemeralMessage = useGameStore(state => state.ephemeralMessage);
-  const setEphemeralMessage = useGameStore(state => state.setEphemeralMessage);
+  const enqueueMessage = useGameStore(state => state.enqueueMessage);
+  const dequeueMessage = useGameStore(state => state.dequeueMessage);
+  const setScopedEphemeralMessage = useGameStore(state => state.setScopedEphemeralMessage);
   const storeHandleGlobalAction = useGameStore(state => state.handleGlobalAction);
   const verifyGameState = useGameStore(state => state.verifyGameState);
   const pendingPhaseReward = useGameStore(state => state.pendingPhaseReward);
@@ -262,7 +262,7 @@ export function DashboardPage() {
       };
       const msgId = phaseToId[phase];
       if (msgId) {
-        setEphemeralMessage(msgId, { stars: totalStars });
+        setScopedEphemeralMessage('dash_phase_reward', msgId, { stars: totalStars }, 'dashboard');
       }
 
       // 2. Esperar 4 segundos (mientras el mensaje es efímero) y luego lanzar estrellas
@@ -297,13 +297,12 @@ export function DashboardPage() {
 
       }, 4000); // El retraso de 4 segundos solicitado
     }
-  }, [pendingPhaseReward, isAnimatingReward, updateStars, clearPendingPhaseReward, setEphemeralMessage]);
+  }, [pendingPhaseReward, isAnimatingReward, updateStars, clearPendingPhaseReward, setScopedEphemeralMessage]);
 
   // 2. Verificar estado del juego (Nuevo día, etc.) al montar
   useEffect(() => {
     verifyGameState();
-    setEphemeralMessage(null); // Limpieza de efímeros al entrar para priorizar fondos
-  }, [verifyGameState, setEphemeralMessage]);
+  }, [verifyGameState]);
 
   // --- LÓGICA DEL ESTADO DERIVADO (Fondo del Dashboard) ---
   const isReviewDay = useGameStore(state => state.isReviewDay);
@@ -314,33 +313,51 @@ export function DashboardPage() {
     return isChronologicallyNewDay(lastResetDate, today);
   }, [lastResetDate, today]);
 
-  // Calculamos el fondo en tiempo real (Reglas de persistencia)
-  const backgroundDashboard = useMemo(() => {
+  // ORQUESTACIÓN DE MENSAJES (NUEVO ENGINE)
+  // 1. Fondo Día de Revisión (Prioridad 1)
+  useEffect(() => {
     if (isReviewDay) {
-      const entry = spiralCatalog["REVIEW_DAY_WAITING"];
-      if (entry) {
-        let text = Array.isArray(entry.text) ? entry.text[Math.floor(Math.random() * entry.text.length)] : entry.text;
-        text = text.replace(/\{\{userName\}\}/g, useGameStore.getState().userName || "Amelia");
-        return { ...entry, id: "REVIEW_DAY_WAITING", text };
-      }
-      return null;
+      enqueueMessage('dash_ambient', 'REVIEW_DAY_WAITING', {}, 'dashboard');
+    } else {
+      dequeueMessage('dash_ambient');
     }
+  }, [isReviewDay, enqueueMessage, dequeueMessage]);
 
-    if (isNewDay && !isDayTransitioning) {
-      const entry = spiralCatalog["NEW_DAY_PROMPT"]; // Asumo que este es el modal de nuevo día
-      if (entry) {
-        let text = Array.isArray(entry.text) ? entry.text[Math.floor(Math.random() * entry.text.length)] : entry.text;
-        text = text.replace(/\{\{userName\}\}/g, useGameStore.getState().userName || "Amelia");
-        return { ...entry, id: "NEW_DAY_PROMPT", text };
-      }
-      return null;
+  // 2. Modales Bloqueantes (Prioridad 5 y 4)
+  useEffect(() => {
+    if (isNewDay && !isDayTransitioning && !isReviewDay) {
+      enqueueMessage('dash_new_day', 'NEW_DAY_PROMPT', {}, 'dashboard');
+    } else {
+      dequeueMessage('dash_new_day');
     }
+  }, [isNewDay, isDayTransitioning, isReviewDay, enqueueMessage, dequeueMessage]);
 
-    // Si ni es día de revisión ni es nuevo día (o ya se procesaron)
-    return null;
-  }, [isReviewDay, isNewDay, isDayTransitioning]);
+  useEffect(() => {
+    if (isFullMoonLocked && !isPersistedCelebration) {
+      enqueueMessage('dash_full_moon', 'DASHBOARD_FULL_MOON', {}, 'dashboard');
+    } else {
+      dequeueMessage('dash_full_moon');
+    }
+  }, [isFullMoonLocked, isPersistedCelebration, enqueueMessage, dequeueMessage]);
 
-  // Efecto al entrar: si no hay mensajes de fondo (ya iniciamos el día normal), disparamos la luna efímera
+  useEffect(() => {
+    if (showRenewalMessage) {
+      enqueueMessage('dash_renewal', 'RENEW_MOON_PROMPT', {}, 'dashboard');
+    } else {
+      dequeueMessage('dash_renewal');
+    }
+  }, [showRenewalMessage, enqueueMessage, dequeueMessage]);
+
+  useEffect(() => {
+    // Caso C/D: Tienes carta en mano y no hay celebración activa tapando
+    if (pendingPlacementCard && !showRenewalMessage && !isRenewingMoon) {
+      enqueueMessage('dash_pending_card', 'PENDING_CARD_PROMPT', {}, 'dashboard');
+    } else {
+      dequeueMessage('dash_pending_card');
+    }
+  }, [pendingPlacementCard, showRenewalMessage, isRenewingMoon, enqueueMessage, dequeueMessage]);
+
+  // 3. Efímero de Cambio de Fase Normal
   useEffect(() => {
     if (!isReviewDay && !isNewDay && !isDayTransitioning) {
       const phaseToId = {
@@ -351,37 +368,13 @@ export function DashboardPage() {
       };
       const msgId = phaseToId[globalMoonPhase.name];
       if (msgId) {
-        setEphemeralMessage(msgId);
+        setScopedEphemeralMessage('dash_phase_change', msgId, {}, 'dashboard');
       }
     }
-  }, [isReviewDay, isNewDay, isDayTransitioning, globalMoonPhase.name, setEphemeralMessage]);
+  }, [isReviewDay, isNewDay, isDayTransitioning, globalMoonPhase.name, setScopedEphemeralMessage]);
 
-  // Mensaje final: Espiral persistente tiene prioridad, luego efímero, luego fondo estructural
-  let activeMessage = null;
-  if (!isDayTransitioning) {
-    if (showRenewalMessage) {
-      activeMessage = {
-        id: "RENEW_MOON_PROMPT",
-        text: "¡Wow, una carta mágica apareció! ¿Vamos al álbum a insertarla? ✨",
-        video: "assets/videos/spiral_message.mp4",
-        actionConfig: [
-          { label: "Al Álbum", type: "GO_TO_ALBUM", variant: "highlighted", icon: "next" },
-          { label: "Mejor Luego", type: "RENEW_MOON_LATER", variant: "normal", icon: "cancel" }
-        ]
-      };
-    } else if (isFullMoonLocked && !isPersistedCelebration) {
-      activeMessage = {
-        id: "DASHBOARD_FULL_MOON",
-        text: "¡Miau, ¡qué brillo! 🌕✨! Es Luna Llena, ¡Ganas 60 ⭐! y una carta para tu albúm.",
-        video: "assets/videos/spiral_message.mp4",
-        actionConfig: [
-          { label: "Recoger Carta Mágica", type: "CLAIM_MOON_REWARD", variant: "highlighted", icon: "star" }
-        ]
-      };
-    } else {
-      activeMessage = spiralMessage || ephemeralMessage || backgroundDashboard;
-    }
-  }
+  // Mensaje final: El Selector Puro
+  const activeMessage = useGameStore(state => selectActiveMessage(state, 'dashboard'));
 
   // Regla de pluralización (Blueprint)
   const getPluralizedText = (count, unit) => {
@@ -712,7 +705,7 @@ export function DashboardPage() {
                 key={`${act.id}-${lastResetDate}`}
                 elevation={act.completed ? "lowest" : "low"}
                 delay={cardDelay}
-                className={`p-5 flex items-center justify-between group cursor-pointer transition-all duration-500 relative border !bg-surface-container/20 backdrop-blur-lg ${act.completed ? 'border-primary/20 opacity-80' : 'border-transparent hover:!bg-surface-container/40'}`}
+                className={`p-5 flex items-center justify-between group cursor-pointer transition-colors duration-500 relative border !bg-surface-container/20 backdrop-blur-lg ${act.completed ? 'border-primary/20 opacity-80' : 'border-transparent hover:!bg-surface-container/40'}`}
                 onClick={() => completeActivity(act)}
               >
                 <div
@@ -816,6 +809,7 @@ export function DashboardPage() {
             actionConfig={activeMessage.actionConfig || []}
             onAction={handleGlobalAction}
             video={activeMessage.video}
+            bgImage="/bgSpiralBubble.png"
             delay={isDayTransitioning ? 8.0 : 0.6}
             disabled={isAnimatingReward}
             className={isRenewingMoon ? "!bottom-8" : ""}
@@ -830,6 +824,7 @@ export function DashboardPage() {
           isOverlayMode={true}
           delay={0}
           video={activeMessage?.video}
+          bgImage="/bgSpiralBubble.png"
         />
         <div className="flex flex-col w-full gap-3 px-8 max-w-[340px] mx-auto mt-6 pb-4">
           {activeMessage?.actionConfig?.map((action, idx) => {

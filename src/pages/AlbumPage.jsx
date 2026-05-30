@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../components/ui/Button';
 import { GlassCard } from '../components/ui/GlassCard';
@@ -10,6 +11,8 @@ import { PageDepthWrapper, ActionModalOverlay } from '../components/ui/Interacti
 
 // --- CONEXIÓN ZUSTAND ---
 import { useGameStore } from '../store/useGameStore';
+import { selectActiveMessage } from '../store/slices/createMessageSlice';
+import { spiralCatalog } from '../data/spiralCatalog';
 
 export function AlbumPage() {
   // --- ZUSTAND STORE ---
@@ -22,8 +25,14 @@ export function AlbumPage() {
   const unlockPage = useGameStore(state => state.unlockPage);
   const claimReward = useGameStore(state => state.claimReward);
   const setRewardState = useGameStore(state => state.setRewardState);
-  const ephemeralMessage = useGameStore(state => state.ephemeralMessage);
-  const setEphemeralMessage = useGameStore(state => state.setEphemeralMessage);
+  
+  // -- Message Engine Hooks --
+  const enqueueMessage = useGameStore(state => state.enqueueMessage);
+  const dequeueMessage = useGameStore(state => state.dequeueMessage);
+  const setScopedEphemeralMessage = useGameStore(state => state.setScopedEphemeralMessage);
+  const rawState = useGameStore(state => state);
+  const activeMessage = selectActiveMessage(rawState, 'album');
+
   const handleGlobalAction = useGameStore(state => state.handleGlobalAction);
   const ritualState = useGameStore(state => state.ritualState) || { phase: 'idle', step: 1, rewards: null };
   const startClaimRitualStore = useGameStore(state => state.startClaimRitual);
@@ -33,14 +42,13 @@ export function AlbumPage() {
   const hasUnlockItem = polvoLunarCount >= 2;
 
   // --- ESTADOS LOCALES DE INTERACCIÓN ---
-  const [activePageIdToUnlock, setActivePageIdToUnlock] = useState(null);
   const [selectedSlotForDetail, setSelectedSlotForDetail] = useState(null);
   const [isCorrectGuess, setIsCorrectGuess] = useState(false);
   const [placingSlotId, setPlacingSlotId] = useState(null);
 
-  const [localPrompt, setLocalPrompt] = useState(null);
   const [rewardPromptDismissed, setRewardPromptDismissed] = useState(false);
   const ritualPhase = ritualState.phase;
+  const navigate = useNavigate();
 
   // --- DERIVADOS REACTIVOS ---
   const albumPages = globalPages.map(page => {
@@ -62,20 +70,22 @@ export function AlbumPage() {
   useEffect(() => {
     setRewardPromptDismissed(false);
     if (pendingPlacementCard) {
-      setEphemeralMessage("PENDING_PLACEMENT_REMINDER", { title: pendingPlacementCard.title });
+      enqueueMessage('album_state', 'PENDING_PLACEMENT_REMINDER', { title: pendingPlacementCard.title }, 'album');
     } else if (isRitualReady) {
-      setEphemeralMessage("ALBUM_PENTACLE_COMPLETE");
+      enqueueMessage('album_state', 'ALBUM_PENTACLE_COMPLETE', {}, 'album');
     } else if (isClaimed) {
-      setEphemeralMessage("ALBUM_PAGE_CLAIMED", { pageNum: currentPage });
+      enqueueMessage('album_state', 'ALBUM_PAGE_CLAIMED', { pageNum: currentPage }, 'album');
     } else {
       const pageSlots = globalSlots.filter(s => s.pageId === currentPage);
       const filledCount = pageSlots.filter(s => s.state === 'filled').length;
       const key = `ALBUM_ENTRY_${filledCount}`;
-      setEphemeralMessage(key, {
+      setScopedEphemeralMessage('album_state', key, {
         pageNum: currentPage,
         pageTitle: currentPageData?.title || ''
-      });
+      }, 'album');
     }
+
+    return () => dequeueMessage('album_state', 'album');
   }, [currentPage, pendingPlacementCard, isRitualReady, isClaimed]);
 
   // Vértices del Pentáculo Map
@@ -103,20 +113,12 @@ export function AlbumPage() {
   const handleRitualVideoEnded = () => {
     claimReward(currentPage, 300);
     resetRitualState();
-    setEphemeralMessage("MOON_REWARD_CLAIMED");
     document.body.classList.remove('ritual-ui-fadeout');
   };
 
   const handleCloseCelebration = () => {
     setIsCorrectGuess(false);
     document.body.classList.remove('ritual-ui-fadeout'); // Por si acaso
-    // Si al cerrar el modal de celebración el álbum de la página actual está 100% completado
-    // y el premio no ha sido reclamado, disparamos el mensaje efímero de Spiral!
-    const pageSlots = globalSlots.filter(s => s.pageId === currentPage);
-    const isNowComplete = pageSlots.every(s => s.state === 'filled');
-    if (isNowComplete && currentPageData?.rewardState === 'default') {
-      setEphemeralMessage("ALBUM_PENTACLE_COMPLETE");
-    }
   };
 
   const handleSlotClick = (slot) => {
@@ -142,41 +144,48 @@ export function AlbumPage() {
           const filledSlotsCount = slots.filter(s => s.state === 'filled').length;
           const isCompletingPage = filledSlotsCount === 4; // Era 4, ahora con esta se completa
 
-          if (!isCompletingPage) {
-            setEphemeralMessage("MOON_REWARD_CLAIMED");
-          }
-
           setPlacingSlotId(null);
         }, 1800);
       } else {
         // Error de adivinación
-        setEphemeralMessage("WRONG_PENTAGRAM_GUESS");
+        setScopedEphemeralMessage('album_guess', 'WRONG_PENTAGRAM_GUESS', { userName: useGameStore.getState().userName }, 'album');
       }
     } else {
-      setLocalPrompt("Para conseguir cartas para esta casilla, ¡completa tus actividades diarias y celebra la Luna Llena! 🌕🐾");
+      setScopedEphemeralMessage('album_action', 'ALBUM_SLOT_EMPTY_INFO', {}, 'album');
     }
   };
 
   const handlePageClick = (page) => {
     if (page.state === 'locked') {
-      setActivePageIdToUnlock(page.id);
+      const prevPage = albumPages.find(p => p.id === page.id - 1);
+      const isPrevComplete = prevPage ? prevPage.isSuperFullMoon : true;
+      const canUnlock = hasUnlockItem && isPrevComplete;
+
+      enqueueMessage('album', canUnlock ? 'ALBUM_UNLOCK_PAGE_WITH_ITEM' : 'ALBUM_UNLOCK_PAGE_NO_ITEM', { targetPageId: page.id });
       return;
     }
     setCurrentPage(page.id);
     if (!pendingPlacementCard) {
-      setEphemeralMessage("ALBUM_PAGE_CHANGE", { pageNum: page.id });
+      setScopedEphemeralMessage('album_action', 'ALBUM_PAGE_CHANGE', { pageNum: page.id }, 'album');
     }
   };
 
-  const confirmUnlockPage = () => {
-    const prevPage = albumPages.find(p => p.id === activePageIdToUnlock - 1);
-    const isPrevComplete = prevPage ? prevPage.isSuperFullMoon : true;
-
-    if (hasUnlockItem && isPrevComplete) {
-      unlockPage(activePageIdToUnlock);
-      setCurrentPage(activePageIdToUnlock);
-      setEphemeralMessage("ALBUM_PAGE_CHANGE", { pageNum: activePageIdToUnlock });
-      setActivePageIdToUnlock(null);
+  const handleAlbumAction = (action) => {
+    if (action.type === 'ALBUM_UNLOCK_CONFIRM') {
+      const targetPageId = activeMessage?.extraData?.targetPageId;
+      if (targetPageId) {
+        unlockPage(targetPageId);
+        setCurrentPage(targetPageId);
+        setScopedEphemeralMessage('album_action', 'ALBUM_PAGE_CHANGE', { pageNum: targetPageId }, 'album');
+      }
+      dequeueMessage('album');
+    } else if (action.type === 'ALBUM_UNLOCK_CANCEL') {
+      dequeueMessage('album');
+    } else if (action.type === 'ALBUM_NAVIGATE_STORE') {
+      dequeueMessage('album');
+      navigate('/store');
+    } else {
+      handleGlobalAction(action);
     }
   };
 
@@ -185,7 +194,6 @@ export function AlbumPage() {
   };
 
   // --- DETALLES DE DIALOGO DE COMPLEMENTO ---
-  const isEligibleFor400 = false;
 
   let messageText = currentPageData?.state === 'locked'
     ? `Miau... la página ${currentPage} está cerrada con un sello estelar.`
@@ -200,11 +208,11 @@ export function AlbumPage() {
     }
   }
 
-  const activeMessageText = ephemeralMessage?.text || null;
+  const activeMessageText = activeMessage?.text || null;
 
   return (
     <>
-      <PageDepthWrapper isActive={activePageIdToUnlock !== null || selectedSlotForDetail !== null || isCorrectGuess !== false} className="relative w-full flex-1 min-h-[calc(100dvh-160px)] max-w-md mx-auto overflow-hidden">
+      <PageDepthWrapper isActive={activeMessage?.id?.startsWith('ALBUM_UNLOCK_PAGE') || selectedSlotForDetail !== null || isCorrectGuess !== false} className="relative w-full flex-1 min-h-[calc(100dvh-160px)] max-w-md mx-auto overflow-hidden">
 
         {/* ================= CAPA 1: UI FLOTANTE (TOP) ================= */}
         <div className="absolute top-0 left-0 w-full p-6 pt-8 z-20 pointer-events-none">
@@ -430,20 +438,7 @@ export function AlbumPage() {
                   </div>
                 )}
 
-                {/* Giant Lock Overlay if Page is Locked */}
-                {currentPageData?.state === 'locked' && (
-                  <div className="absolute inset-0 bg-background/55 backdrop-blur-[3px] flex flex-col items-center justify-center rounded-[2rem] z-20">
-                    <motion.div
-                      initial={{ scale: 0.9, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="p-6 bg-surface-container-high/85 border border-primary/20 rounded-3xl flex flex-col items-center text-center shadow-2xl max-w-[200px]"
-                    >
-                      <Lock size={36} className="text-primary-fixed mb-3" />
-                      <h3 className="text-sm font-display text-primary-fixed mb-1 uppercase tracking-wider">Bloqueado</h3>
-                      <p className="text-[10px] text-on-surface-variant leading-snug">Se requiere abrir con Polvo Lunar.</p>
-                    </motion.div>
-                  </div>
-                )}
+
               </div>
             </div>
 
@@ -472,42 +467,42 @@ export function AlbumPage() {
 
       {/* 5. Spiral Message Bubble (Efímero / Flotante) */}
       <AnimatePresence>
-        {activePageIdToUnlock === null && !isEligibleFor400 && selectedSlotForDetail === null && isCorrectGuess === false && activeMessageText && (
+        {!activeMessage?.id?.startsWith('ALBUM_UNLOCK_PAGE') && selectedSlotForDetail === null && isCorrectGuess === false && activeMessageText && (
           <SpiralMessage
             key="spiral-ephemeral-album"
             className="pointer-events-none z-50"
             message={activeMessageText}
-            video="assets/videos/spiral_message.mp4"
+            bgImage="/bgSpiralBubble.png"
+            video={activeMessage?.video || "assets/videos/spiral_message.mp4"}
             delay={0.2}
           />
         )}
       </AnimatePresence>
 
       {/* 6. OVERLAY MÁGICO MULTI-ESTADO */}
-      <ActionModalOverlay isActive={activePageIdToUnlock !== null || isEligibleFor400 || localPrompt !== null}>
+      <ActionModalOverlay isActive={activeMessage?.id?.startsWith('ALBUM_UNLOCK_PAGE')}>
         {/* Desbloqueo de Página */}
-        {activePageIdToUnlock !== null && (() => {
-          const prevPage = albumPages.find(p => p.id === activePageIdToUnlock - 1);
-          const prevPageSlots = globalSlots.filter(s => s.pageId === activePageIdToUnlock - 1);
+        {activeMessage?.id?.startsWith('ALBUM_UNLOCK_PAGE') && (() => {
+          const targetPageId = activeMessage?.extraData?.targetPageId;
+          const prevPage = albumPages.find(p => p.id === targetPageId - 1);
+          const prevPageSlots = globalSlots.filter(s => s.pageId === targetPageId - 1);
           const prevFilledCount = prevPageSlots.filter(s => s.state === 'filled').length;
-          const prevProgressPct = (prevFilledCount / 5) * 100;
           const isPrevComplete = prevPage ? prevPage.isSuperFullMoon : true;
-          const canUnlock = hasUnlockItem && isPrevComplete;
 
           return (
             <SpiralMessage
-              message={
-                canUnlock
-                  ? `¡Excelente! Reuniste todos los requisitos para desbloquear la página ${activePageIdToUnlock}. ¿Realizamos el ritual de apertura? 🗝️✨`
-                  : `¡Oh no!, aún no reúnes los requisitos para desbloquear la página ${activePageIdToUnlock}`
-              }
+              message={activeMessage.text}
+              bgImage="/bgSpiralBubble.png"
               video="assets/videos/spiral_message.mp4"
               isOverlayMode={true}
+              centerContent={true}
               delay={0}
+              actionConfig={activeMessage.actionConfig}
+              onAction={handleAlbumAction}
               actionButton={
-                <div className="w-full flex flex-col gap-4 mt-2">
+                <div className="w-full flex flex-col gap-4 mt-2 px-8 max-w-[340px] mx-auto">
                   {/* Contenido Visual Interactivo y Temático de Requisitos */}
-                  <div className="w-full flex flex-col gap-2.5 mt-2">
+                  <div className="w-full flex flex-col gap-2.5 mt-2 mb-2">
                     {/* Requisito 1: Página anterior completa */}
                     <GlassCard
                       elevation={isPrevComplete ? "lowest" : "low"}
@@ -539,14 +534,8 @@ export function AlbumPage() {
                         <div className="flex flex-col text-left min-w-0 mt-0.5">
                           <h4 className={`transition-colors text-[0.8rem] font-bold leading-snug truncate ${isPrevComplete ? 'text-on-surface-variant line-through' : 'text-on-surface'
                             }`}>
-                            Completar página anterior
+                            Completa {prevPage?.title || `Página ${targetPageId - 1}`}
                           </h4>
-                          <p className={`uppercase tracking-widest text-[0.58rem] font-medium transition-colors flex items-center gap-1.5 truncate ${isPrevComplete ? 'text-primary' : 'text-tertiary'
-                            }`}>
-                            <span>Álbum</span>
-                            <span className="text-[8px] opacity-40">&bull;</span>
-                            <span className="truncate">{prevPage?.title || `Página ${activePageIdToUnlock - 1}`}</span>
-                          </p>
                         </div>
                       </div>
 
@@ -590,14 +579,8 @@ export function AlbumPage() {
                         <div className="flex flex-col text-left min-w-0 mt-0.5">
                           <h4 className={`transition-colors text-[0.8rem] font-bold leading-snug truncate ${hasUnlockItem ? 'text-on-surface-variant line-through' : 'text-on-surface'
                             }`}>
-                            Reunir polvo lunar
+                            Polvo Lunar
                           </h4>
-                          <p className={`uppercase tracking-widest text-[0.58rem] font-medium transition-colors flex items-center gap-1.5 truncate ${hasUnlockItem ? 'text-primary' : 'text-tertiary'
-                            }`}>
-                            <span>Inventario</span>
-                            <span className="text-[8px] opacity-40">&bull;</span>
-                            <span>2 requeridos</span>
-                          </p>
                         </div>
                       </div>
 
@@ -610,42 +593,13 @@ export function AlbumPage() {
                       </div>
                     </GlassCard>
                   </div>
-
-                  {/* Botones de Acción */}
-                  <div className="flex flex-col w-full gap-2.5 mt-1">
-                    {canUnlock ? (
-                      <>
-                        <Button onClick={confirmUnlockPage} variant="modal_highlighted" className="w-full shadow-lg text-[11px] py-2.5">
-                          <Unlock size={16} /> Desbloquear con 2 Polvos
-                        </Button>
-                        <Button onClick={() => setActivePageIdToUnlock(null)} variant="modal_normal" className="w-full text-[11px] py-2.5">
-                          <Undo2 size={16} /> Regresar
-                        </Button>
-                      </>
-                    ) : (
-                      <Button onClick={() => setActivePageIdToUnlock(null)} variant="modal_highlighted" className="w-full shadow-lg text-[11px] py-2.5">
-                        <Undo2 size={16} /> Regresar
-                      </Button>
-                    )}
-                  </div>
                 </div>
               }
             />
           );
         })()}
 
-
-        {/* Notificación de Casilla Vacía Regular */}
-        {localPrompt !== null && (
-          <>
-            <SpiralMessage message={localPrompt} video="assets/videos/spiral_message.mp4" isOverlayMode={true} delay={0} />
-            <div className="flex flex-col w-full max-w-xs px-4 gap-3 mt-6">
-              <Button onClick={() => setLocalPrompt(null)} variant="modal_highlighted" className="w-full">
-                <Check size={18} /> Entendido
-              </Button>
-            </div>
-          </>
-        )}      </ActionModalOverlay>
+      </ActionModalOverlay>
 
       {/* Modales de pantalla completa (Celebración y Detalle) posicionados de manera independiente */}
       <AnimatePresence>

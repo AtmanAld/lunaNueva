@@ -125,15 +125,31 @@ export const hydrateStoreFromSupabase = async (userId) => {
 
     // 6. Activity Sets
     if (activitySets && activitySets.length > 0) {
+      const serverSetIds = activitySets.map(set => set.set_id);
+      
       stateToUpdate.activitySets = activitySets.map(set => ({
         id: set.set_id,
         isUnlocked: set.is_unlocked,
         isActive: set.is_active
       }));
+
+      // Merge new sets from catalog
+      const { activitySetsCatalog } = await import('../data/activityCatalog.js');
+      const missingSets = activitySetsCatalog.filter(sc => !serverSetIds.includes(sc.id));
+      
+      missingSets.forEach(sc => {
+        stateToUpdate.activitySets.push({
+          id: sc.id,
+          isUnlocked: true,
+          isActive: true
+        });
+      });
     }
 
     // 7. Activities
     if (activities && activities.length > 0) {
+      const serverActivityIds = activities.map(act => act.activity_id);
+      
       stateToUpdate.activities = activities.map(act => ({
         activityID: act.activity_id,
         isUnlocked: act.is_unlocked,
@@ -143,6 +159,22 @@ export const hydrateStoreFromSupabase = async (userId) => {
         periodStartDate: act.period_start_date,
         usedForRitual: act.used_for_ritual
       }));
+
+      // Merge new activities from catalog that are not in Supabase yet
+      const { activityCatalog } = await import('../data/activityCatalog.js');
+      const missingActivities = activityCatalog.filter(ac => !serverActivityIds.includes(ac.activityID));
+      
+      missingActivities.forEach(ac => {
+        stateToUpdate.activities.push({
+          activityID: ac.activityID,
+          isUnlocked: true,
+          isActive: true,
+          completions: 0,
+          fullyCompleted: false,
+          periodStartDate: new Date().toISOString().split('T')[0],
+          usedForRitual: false
+        });
+      });
     }
 
     // 8. Album Pages

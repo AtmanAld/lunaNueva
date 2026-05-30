@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { SpiralMessage } from './SpiralMessage';
 import './PentacleRitualOverlay.css';
 import { useGameStore } from '../../store/useGameStore';
-import { spiralCatalog } from '../../data/spiralCatalog';
+import { selectActiveMessage } from '../../store/slices/createMessageSlice';
 
 /**
  * Interactive screen overlay that handles the multi-step reward ritual.
@@ -20,48 +20,20 @@ export function PentacleRitualOverlay({ isActive, onVideoEnded }) {
   const currentStep = ritualState.step;
   const advanceRitualStep = useGameStore(state => state.advanceRitualStep);
 
-  // Dynamic step config resolver
-  const resolveStepConfig = (step, name, rewards) => {
-    const catalogEntry = spiralCatalog[`RITUAL_STEP_${step}`];
-    if (!catalogEntry) return null;
+  const enqueueMessage = useGameStore(state => state.enqueueMessage);
+  const dequeueMessage = useGameStore(state => state.dequeueMessage);
+  const rawState = useGameStore(state => state);
+  const activeMessage = selectActiveMessage(rawState, 'ritual');
 
-    let rewardText = '';
-    if (step === 1 && rewards?.reward1) rewardText = rewards.reward1.text;
-    if (step === 2 && rewards?.reward2) rewardText = rewards.reward2.text;
-    if (step === 3 && rewards?.reward3) rewardText = rewards.reward3.text;
+  const triggerStepMessage = () => {
+    let rewardText = 'un objeto estelar';
+    if (currentStep === 1 && ritualState.rewards?.reward1) rewardText = ritualState.rewards.reward1.text;
+    if (currentStep === 2 && ritualState.rewards?.reward2) rewardText = ritualState.rewards.reward2.text;
+    if (currentStep === 3 && ritualState.rewards?.reward3) rewardText = ritualState.rewards.reward3.text;
 
-    const replacements = {
-      userName: name,
-      rewardText: rewardText || 'un objeto estelar'
-    };
-
-    let message = Array.isArray(catalogEntry.text) ? catalogEntry.text[0] : catalogEntry.text;
-    Object.entries(replacements).forEach(([key, val]) => {
-      const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
-      message = message.replace(regex, val);
-    });
-
-    const actionConfig = (catalogEntry.actionConfig || []).map(action => {
-      let label = action.label || '';
-      let data = action.data || '';
-      Object.entries(replacements).forEach(([key, val]) => {
-        const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
-        label = label.replace(regex, val);
-        if (typeof data === 'string') {
-          data = data.replace(regex, val);
-        }
-      });
-      return { ...action, label, data };
-    });
-
-    return {
-      message,
-      actionConfig,
-      video: catalogEntry.video || 'assets/videos/spiral_message.mp4'
-    };
+    enqueueMessage('ritual_step', `RITUAL_STEP_${currentStep}`, { userName, rewardText }, 'ritual');
+    setShowBubble(true);
   };
-
-  const currentStepConfig = resolveStepConfig(currentStep, userName, ritualState.rewards) || { message: '', actionConfig: [] };
 
   useEffect(() => {
     if (isActive && phase === 'hidden') {
@@ -76,7 +48,7 @@ export function PentacleRitualOverlay({ isActive, onVideoEnded }) {
 
   const handleVideoEnd = () => {
     // When the current video ends, show the Spiral message bubble to request interaction
-    setShowBubble(true);
+    triggerStepMessage();
   };
 
   const handleTimeUpdate = () => {
@@ -86,15 +58,16 @@ export function PentacleRitualOverlay({ isActive, onVideoEnded }) {
 
     if (currentStep === 1 && time >= 7.56) {
       videoRef.current.pause();
-      setShowBubble(true);
+      triggerStepMessage();
     } else if (currentStep === 6 && time >= 6.19) {
       videoRef.current.pause();
-      setShowBubble(true);
+      triggerStepMessage();
     }
   };
 
   const handleNextStep = (action) => {
     setShowBubble(false);
+    dequeueMessage('ritual_step', 'ritual');
     if (action?.type === 'ADVANCE_RITUAL') {
       advanceRitualStep();
     } else if (action?.type === 'COMPLETE_RITUAL') {
@@ -164,14 +137,15 @@ export function PentacleRitualOverlay({ isActive, onVideoEnded }) {
       )}
 
       {/* Spiral message bubble overlay */}
-      {showBubble && (
+      {showBubble && activeMessage && (
         <div className="absolute inset-x-0 bottom-16 z-50 flex justify-center items-center px-4">
           <SpiralMessage
-            message={currentStepConfig.message}
-            actionConfig={currentStepConfig.actionConfig}
+            message={activeMessage.text}
+            bgImage="/bgSpiralBubble.png"
+            actionConfig={activeMessage.actionConfig}
             onAction={handleNextStep}
             isOverlayMode={true}
-            video={currentStepConfig.video}
+            video={activeMessage.video}
             variant={(currentStep === 5 || currentStep === 6) ? 'bubble-only' : 'default'}
             tailPosition={(currentStep === 5 || currentStep === 6) ? 'top-center' : 'bottom-left'}
           />

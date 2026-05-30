@@ -1,4 +1,47 @@
 export const spiralCatalog = {
+  // === STORE ===
+  "STORE_CONFIRM_ITEM": {
+    priority: 1,
+    text: ["Entre más nos llevamos, ¡más me vibra la colita! 😹"],
+    persistent: true,
+    video: "assets/videos/spiral_message.mp4",
+    actionConfig: [
+      { label: "Comprar", type: "STORE_BUY", icon: "check", variant: "modal_highlighted" },
+      { label: "Mejor luego", type: "STORE_CANCEL", icon: "undo", variant: "modal_normal" }
+    ]
+  },
+  "STORE_CONFIRM_UNAFFORDABLE": {
+    priority: 1,
+    text: ["Miau, No tienes suficientes ⭐ para comprar esto."],
+    persistent: true,
+    video: "assets/videos/spiral_message.mp4",
+    actionConfig: [
+      { label: "Muy bien", type: "STORE_CANCEL", icon: "undo", variant: "modal_normal" }
+    ]
+  },
+
+  // === PROFILE ===
+  "PROFILE_EDIT_MAIN": {
+    priority: 1,
+    text: ["Sube aquí tu nueva foto de perfil o edita otras cosas."],
+    persistent: true,
+    video: "assets/videos/spiral_message.mp4",
+    actionConfig: [
+      { label: "Listo", type: "PROFILE_EDIT_CLOSE", icon: "check", variant: "modal_highlighted" },
+      { label: "Editar nombres", type: "PROFILE_EDIT_OPEN_CONFIG", icon: "settings", variant: "modal_normal" }
+    ]
+  },
+  "PROFILE_EDIT_CONFIG": {
+    priority: 1,
+    text: ["Cambia tu nombre, el mío y otras cosas."],
+    persistent: true,
+    video: "assets/videos/spiral_message.mp4",
+    actionConfig: [
+      { label: "Guardar nombres", type: "PROFILE_EDIT_SAVE_CONFIG", icon: "check", variant: "modal_highlighted" },
+      { label: "Regresar", type: "PROFILE_EDIT_BACK", icon: "undo", variant: "modal_normal" }
+    ]
+  },
+
   "SPIRAL_FELIZ": {
     text: [
       "Prrr... te quiero tanto, {{userName}}. ¿Lo sabes? El universo lo sabe. 💜",
@@ -131,6 +174,7 @@ export const spiralCatalog = {
   },
 
   "THANKS_FOOD": {
+    priority: 2,
     text: [
       "¡Ñam! ¡Te amo más que a las croquetas! ¡Aquí tienes {{stars}} estrellas en agradecimiento! ⭐",
       "¡Pancita llena, corazón contento! ¡Aquí tienes {{stars}} estrellas en agradecimiento! ⭐",
@@ -160,6 +204,7 @@ export const spiralCatalog = {
   },
 
   "THANKS_WATER": {
+    priority: 2,
     text: [
       "¡Glup! ¡Agüita fresca para mi alma de gato! ¡Aquí tienes {{stars}} estrellas en agradecimiento! ⭐",
       "¡Fiu! ¡Ya no soy un gatito desértico! ¡Aquí tienes {{stars}} estrellas en agradecimiento! ⭐",
@@ -189,6 +234,7 @@ export const spiralCatalog = {
   },
 
   "THANKS_WASH": {
+    priority: 2,
     text: [
       "¡Limpito y con olor a flores! ¡Te amo! ¡Aquí tienes {{stars}} estrellas en agradecimiento! ⭐",
       "¡Mírame! ¡Soy una nube blanca de algodón! ¡Aquí tienes {{stars}} estrellas en agradecimiento! ⭐",
@@ -218,6 +264,7 @@ export const spiralCatalog = {
   },
 
   "THANKS_PLAY": {
+    priority: 2,
     text: [
       "¡Ese ratón no tuvo oportunidad! ¡Te amo! ¡Aquí tienes {{stars}} estrellas en agradecimiento! ⭐",
       "¡Salto más alto que la luna! ¡Miau! ¡Aquí tienes {{stars}} estrellas en agradecimiento! ⭐",
@@ -303,16 +350,19 @@ export const spiralCatalog = {
   },
 
   "REWARD_LUNA_CRECIENTE": {
+    priority: 3,
     text: ["¡La Luna se convirtió en Luna Creciente, ganas 10⭐, Felicidades! 🌙✨"],
     video: "assets/videos/spiral_message.mp4",
     duration: 4000
   },
   "REWARD_LUNA_CUARTO_CRECIENTE": {
+    priority: 3,
     text: ["¡La Luna se convirtió en Cuarto Creciente, ganas 20⭐, Felicidades! 🌓✨"],
     video: "assets/videos/spiral_message.mp4",
     duration: 4000
   },
   "REWARD_LUNA_GIBOSA_CRECIENTE": {
+    priority: 3,
     text: ["¡La Luna se convirtió en Gibosa Creciente, ganas 30⭐, Felicidades! 🌔✨"],
     video: "assets/videos/spiral_message.mp4",
     duration: 4000
@@ -321,6 +371,7 @@ export const spiralCatalog = {
 
 
   "DASHBOARD_FULL_MOON": {
+    priority: 3,
     text: [
       "¡Miau, ¡qué brillo! 🌕✨! Es Luna Llena, ¡Ganas {{stars}} ⭐! y una carta para tu albúm."
     ],
@@ -331,6 +382,7 @@ export const spiralCatalog = {
   },
 
   "MOON_DUST_USED": {
+    priority: 3,
     text: [
       "¡Miau! El polvo lunar brilla en el cielo. ¡La luna avanzó 20 puntos! 🌕✨"
     ],
@@ -339,6 +391,7 @@ export const spiralCatalog = {
   },
 
   "CONFIRM_WATER": {
+    priority: 2,
     text: [
       "¡Qué sed tengo! ¿Me das un poquito de agua cósmica? 💧🐾"
     ],
@@ -350,6 +403,7 @@ export const spiralCatalog = {
   },
 
   "CONFIRM_FOOD": {
+    priority: 2,
     text: [
       "Mi pancita está haciendo ruidos extraños... ¿Me das esas croquetas deliciosas? 🐟✨"
     ],
@@ -361,6 +415,7 @@ export const spiralCatalog = {
   },
 
   "CONFIRM_WASH": {
+    priority: 2,
     text: [
       "Creo que tengo un poco de polvo estelar encima... ¿Me ayudas a bañarme? 🧼🐱"
     ],
@@ -372,6 +427,7 @@ export const spiralCatalog = {
   },
 
   "CONFIRM_PLAY": {
+    priority: 2,
     text: [
       "¡Tengo demasiada energía acumulada! ¿Jugamos con el ratón espacial? 🐭⚡"
     ],
@@ -383,6 +439,7 @@ export const spiralCatalog = {
   },
 
   "GO_TO_STORE_NO_ITEM": {
+    priority: 3,
     text: [
       "¡Miau! Al parecer no tenemos de eso en el inventario. ¿Damos un paseo por la tienda a buscar más? 🛒✨"
     ],
@@ -394,6 +451,7 @@ export const spiralCatalog = {
   },
 
   "NEW_DAY_PROMPT": {
+    priority: 2,
     text: [
       "¡Buenos días, {{userName}}! He notado que es un nuevo día. ¿Empezamos con energía nueva o revisamos qué hicimos ayer? 🌅🐾"
     ],
@@ -405,6 +463,7 @@ export const spiralCatalog = {
   },
 
   "REVIEW_DAY_WAITING": {
+    priority: 2,
     text: [
       "Tranquila, te espero cuando estés lista. ¡Iniciamos nuevo día! 🌅🐾"
     ],
@@ -415,6 +474,7 @@ export const spiralCatalog = {
   },
 
   "ACTIVITY_COMPLETE_SINGLE": {
+    priority: 2,
     text: [
       "+ {{stars}}⭐"
     ],
@@ -424,6 +484,7 @@ export const spiralCatalog = {
   },
 
   "ACTIVITY_CANCEL_SINGLE": {
+    priority: 2,
     text: [
       "- {{stars}}⭐"
     ],
@@ -433,6 +494,7 @@ export const spiralCatalog = {
   },
 
   "ACTIVITY_COMPLETE_MULTIPLE": {
+    priority: 2,
     text: [
       "+ {{stars}}⭐"
     ],
@@ -442,6 +504,7 @@ export const spiralCatalog = {
   },
 
   "ACTIVITY_CANCEL_MULTIPLE": {
+    priority: 2,
     text: [
       "- {{stars}}⭐"
     ],
@@ -451,6 +514,7 @@ export const spiralCatalog = {
   },
 
   "PHASE_CHANGE": {
+    priority: 3,
     text: [
       "¡Mira arriba, {{userName}}! Hemos entrado a una nueva fase lunar. ¡La magia fluye! 🌙✨"
     ],
@@ -460,6 +524,7 @@ export const spiralCatalog = {
   },
 
   "MOON_REWARD_CLAIMED": {
+    priority: 3,
     text: [
       "¡Miau! Completamos el ritual y reclamamos la esencia de esta luna. ¡Buen trabajo, {{userName}}! 🌕🐾",
       "¡Prrr! El dinero del ritual está seguro en tu perfil. La magia se ha sellado con éxito. 🪙✨",
@@ -478,6 +543,7 @@ export const spiralCatalog = {
   },
 
   "NO_NEED_WATER": {
+    priority: 2,
     text: [
       "¡Glup, glup! Gracias, pero estoy nadando en agua ahora mismo. ¡No tengo sed! 💧😸"
     ],
@@ -487,6 +553,7 @@ export const spiralCatalog = {
   },
 
   "NO_NEED_FOOD": {
+    priority: 2,
     text: [
       "¡Burp! Ay, perdona mis modales. Estoy tan lleno que no me cabe ni una croqueta más. 🐟🐱"
     ],
@@ -496,6 +563,7 @@ export const spiralCatalog = {
   },
 
   "NO_NEED_WASH": {
+    priority: 2,
     text: [
       "¡Mírame! Brillo tanto que podría cegarte. ¡Estoy impecable, no necesito baño! ✨🧼"
     ],
@@ -505,6 +573,7 @@ export const spiralCatalog = {
   },
 
   "NO_NEED_PLAY": {
+    priority: 2,
     text: [
       "¡Fiu! Estoy agotado de tanto saltar. Necesito una siestita antes de volver a jugar. 😴🐾"
     ],
@@ -514,6 +583,7 @@ export const spiralCatalog = {
   },
 
   "ALBUM_PLACE_CARD": {
+    priority: 2,
     text: [
       "¡Qué bonita carta! ¿Estás segura de que quieres colocarla aquí? 🃏✨"
     ],
@@ -525,6 +595,7 @@ export const spiralCatalog = {
   },
 
   "ALBUM_UNLOCK_SLOT_WITH_ITEM": {
+    priority: 2,
     text: [
       "¡Tienes la llave mágica! ¿Usamos tu ítem para desbloquear esta casilla y llenarla de magia? 🗝️✨"
     ],
@@ -536,6 +607,7 @@ export const spiralCatalog = {
   },
 
   "ALBUM_UNLOCK_SLOT_NO_ITEM": {
+    priority: 2,
     text: [
       "¡Miau! Esta casilla está cerrada y no tienes el ítem para abrirla. ¿Damos un salto a la tienda? 🛒🐱"
     ],
@@ -547,28 +619,30 @@ export const spiralCatalog = {
   },
 
   "ALBUM_UNLOCK_PAGE_WITH_ITEM": {
+    priority: 2,
     text: [
       "¡Wow! Todo un mundo nuevo por descubrir. ¿Usamos el ítem para abrir esta página secreta? 📖✨"
     ],
     video: "assets/videos/spiral_message.mp4",
     actionConfig: [
-      { label: "Desbloquear", type: "UNLOCK_PAGE", variant: "highlighted", icon: "check" },
-      { label: "Cancelar", type: "CANCEL", variant: "normal", icon: "cancel" }
+      { label: "Desbloquear con 2 Polvos", type: "ALBUM_UNLOCK_CONFIRM", variant: "modal_highlighted", icon: "unlock" },
+      { label: "Regresar", type: "ALBUM_UNLOCK_CANCEL", variant: "modal_normal", icon: "undo" }
     ]
   },
 
   "ALBUM_UNLOCK_PAGE_NO_ITEM": {
+    priority: 2,
     text: [
-      "¡Página bloqueada! Necesitamos un ítem especial para ver qué hay aquí. ¿Vamos a buscarlo a la tienda? 🐾🛒"
+      "¡Mec Mec!, no podemos entrar en esta página hasta cumplir los requisitos:"
     ],
     video: "assets/videos/spiral_message.mp4",
     actionConfig: [
-      { label: "Ir a tienda", type: "NAVIGATE_STORE", variant: "highlighted", icon: "store" },
-      { label: "Regresar", type: "CANCEL", variant: "normal", icon: "back" }
+      { label: "Regresar", type: "ALBUM_UNLOCK_CANCEL", variant: "modal_highlighted", icon: "undo" }
     ]
   },
 
   "ALBUM_PAGE_FULL_OFFER": {
+    priority: 2,
     text: [
       "¡Increíble, casi llenas la página! ¿Quieres canjearla ahora o prefieres llenar la última carta secreta para ganar más dinerito? 💸😻"
     ],
@@ -580,6 +654,7 @@ export const spiralCatalog = {
   },
 
   "ALBUM_PAGE_COMPLETE_EXCHANGE": {
+    priority: 2,
     text: [
       "¡Espléndido! La página está completamente llena de magia. ¿Lista para canjear tu merecida recompensa? 🎁✨"
     ],
@@ -591,6 +666,7 @@ export const spiralCatalog = {
   },
 
   "STORE_BUY_ACTIVITY": {
+    priority: 2,
     text: [
       "¡Ooh! Esa actividad suena fantástica. ¿Te animas a agregarla a tu rutina? 🌟🛒"
     ],
@@ -603,6 +679,7 @@ export const spiralCatalog = {
   },
 
   "STORE_ACTIVITY_DETAIL": {
+    priority: 2,
     text: [
       "Aquí tienes todos los chismecitos de esta actividad. ¿La compramos, jefa? 📝✨"
     ],
@@ -614,6 +691,7 @@ export const spiralCatalog = {
   },
 
   "STORE_ACTIVITY_BOUGHT": {
+    priority: 2,
     text: [
       "¡Compra exitosa! Ya tienes una nueva actividad lista para brillar. ¡Miau! 🛍️✨"
     ],
@@ -623,6 +701,7 @@ export const spiralCatalog = {
   },
 
   "STORE_NOT_ENOUGH_STARS": {
+    priority: 2,
     text: [
       "¡Ups! {{userName}}, aún no tienes suficientes estrellas para esto. ¡Sigue brillando para ganar más! ⭐🐾"
     ],
@@ -632,6 +711,7 @@ export const spiralCatalog = {
   },
 
   "STORE_BUY_ITEM": {
+    priority: 2,
     text: [
       "¡Un regalito para mí o para el álbum! ¿Usamos las estrellas para llevarnos esto a casa? 🎁🐱"
     ],
@@ -643,6 +723,7 @@ export const spiralCatalog = {
   },
 
   "PROFILE_EDIT_AVATAR": {
+    priority: 2,
     text: [
       "¡Miau! ¿Quieres cambiar tu foto de perfil? ¡Seguro te verás genial! 📸✨"
     ],
@@ -655,6 +736,7 @@ export const spiralCatalog = {
   },
 
   "PROFILE_EDIT_NAMES": {
+    priority: 2,
     text: [
       "¡Genial! Actualiza tus datos. Prometo aprenderme mi nuevo nombre muy rápido. ✍️🐱"
     ],
@@ -672,6 +754,7 @@ export const spiralCatalog = {
     duration: 4000
   },
   "ALBUM_ENTRY_0": {
+    priority: 3,
     text: [
       "¡Miau! Todo vacío por aquí. ¿Esconderá secretos de sardinas o portales estelares? 🐟🪐",
       "¡Prrr! Una página en blanco... ¿será sobre gatos intergalácticos o sobre siestas? 💤✨",
@@ -683,17 +766,19 @@ export const spiralCatalog = {
     duration: 4000
   },
   "ALBUM_ENTRY_1": {
+    priority: 3,
     text: [
       "¡Miau! Una tarjeta solitaria. ¡Un gran inicio para nuestro camino cósmico! 🐾✨",
       "¡Prrr! Veo una tarjeta colocada. ¡La magia de este sello está despertando! 🌟🔮",
       "¡Meow! ¡Mira cómo brilla! Poco a poco llenaremos este pentáculo. 😼💖",
       "¡Una tarjeta lista! Es pequeña pero poderosa, justo como yo. 🐈📖",
-      "¡Miau! El primer secreto ha sido revelado. ¡El universo conspira a favor! 🪐",
+      "¡Miau! El primer secreto ha sido revelado. ¡El universo conspira a favor! 🪐"
     ],
     video: "assets/videos/spiral_message.mp4",
     duration: 4000
   },
   "ALBUM_ENTRY_2": {
+    priority: 3,
     text: [
       "¡Meow! Dos tarjetas. ¡Es como tener dos platos llenos de comida deliciosa! 🍲✨",
       "¡Prrr! Ya tenemos dos recuerdos. Falta menos para activar la magia. 😸",
@@ -705,6 +790,7 @@ export const spiralCatalog = {
     duration: 4000
   },
   "ALBUM_ENTRY_3": {
+    priority: 3,
     text: [
       "¡Prrr! ¡Tres tarjetas! ¡Eso ya es más de la mitad! Eres una gran maga. 🧙‍♀️✨",
       "¡Meow! Tres recuerdos listos. ¡Siento cosquillas mágicas en los bigotes! 😻🔮",
@@ -716,6 +802,7 @@ export const spiralCatalog = {
     duration: 4000
   },
   "ALBUM_ENTRY_4": {
+    priority: 3,
     text: [
       "¡Miau! ¡Solo falta una! Mi cola no deja de moverse de la emoción. 🐈✨",
       "¡Prrr! Cuatro tarjetas listas. ¡Una más y el ritual estará completo! 🌟🔮",
@@ -726,7 +813,16 @@ export const spiralCatalog = {
     video: "assets/videos/spiral_message.mp4",
     duration: 4000
   },
+  "ALBUM_SLOT_EMPTY_INFO": {
+    priority: 3,
+    text: [
+      "Para conseguir cartas para esta casilla, ¡completa tus actividades diarias y celebra la Luna Llena! 🌕🐾"
+    ],
+    video: "assets/videos/spiral_message.mp4",
+    duration: 5000
+  },
   "ALBUM_PAGE_CHANGE": {
+    priority: 5,
     text: [
       "¡Meow! Cambiamos a la página {{pageNum}}. ¡Mira cuánta magia hay aquí! 🌟"
     ],
@@ -734,6 +830,7 @@ export const spiralCatalog = {
     duration: 4000
   },
   "IDLE_REWARDS": {
+    priority: 2,
     text: [
       "¡{{userName}}! Mágicamente encontré {{stars}} ⭐ atrapando pelusas por ahí. Creo que me siento fantástico hoy. ✨",
       "¡Sorpresa! Estaba tan a gusto que estas {{stars}} ⭐ simplemente aparecieron. ¿Magia cósmica o soy un genio? 😼",
@@ -754,6 +851,7 @@ export const spiralCatalog = {
     ]
   },
   "MOON_REWARD_CLAIMED_NEW": {
+    priority: 3,
     text: [
       "¡Miau! La Luna Llena te ha bendecido con la carta \"{{title}}\". Pero espera... ¡está flotando! Ve al álbum para descubrir en qué vértice del pentáculo encaja perfectamente. 🐾🃏"
     ],
@@ -763,6 +861,7 @@ export const spiralCatalog = {
     ]
   },
   "SPIRAL_GIFT_STARS": {
+    priority: 3,
     text: [
       "¡Miau! Tu página del álbum ya está 100% llena. Como recompensa, ¡Spiral te regala {{stars}} ⭐ para que alcances las 300 estrellas y puedas comprar Polvo Lunar en la tienda! 🎁✨"
     ],
@@ -772,6 +871,7 @@ export const spiralCatalog = {
     ]
   },
   "ALBUM_PAGE_COMPLETE_LOCK": {
+    priority: 3,
     text: [
       "¡Miau! Esta página ya está completa al 100%. Debes desbloquear la siguiente página en el álbum para poder recibir más cartas de las celebraciones de Luna Llena. 🐾📖"
     ],
@@ -781,6 +881,7 @@ export const spiralCatalog = {
     ]
   },
   "PENDING_PLACEMENT_WARNING": {
+    priority: 3,
     text: [
       "¡Miau! Aún tienes la carta \"{{title}}\" flotando en tus manos. Ve al álbum y colócala en su altar antes de que la energía de esta nueva luna se disipe. 🐾✨"
     ],
@@ -790,6 +891,7 @@ export const spiralCatalog = {
     ]
   },
   "WRONG_PENTAGRAM_GUESS": {
+    priority: 5,
     text: [
       "¡Oh no, ahí no va... ¿probamos en otra casilla? 🐾😅",
       "¡Uy, casi! Pero siento que esa carta pertenece a otro lugar. 🐈‍⬛✨",
@@ -806,6 +908,7 @@ export const spiralCatalog = {
     duration: 3500
   },
   "PENDING_PLACEMENT_REMINDER": {
+    priority: 2,
     text: [
       "Tienes la carta \"{{title}}\" en mano. ¡Haz clic en el vértice del pentáculo donde crees que encaja! 🐾🃏"
     ],
@@ -813,6 +916,7 @@ export const spiralCatalog = {
     duration: 4000
   },
   "ALBUM_PENTACLE_COMPLETE": {
+    priority: 2,
     text: [
       "¡Wow! completamos los elementos, ¿iniciamos el ritual de cobrar? 🎁🔮"
     ],
@@ -898,6 +1002,7 @@ export const spiralCatalog = {
   },
 
   "ALBUM_PAGE_CLAIMED": {
+    priority: 1,
     text: [
       "¡Miau! Esta página ya brilla con el sello del ritual cobrado. ¡Bien hecho! 🌕🪙",
       "Prrr... Siento la energía residual de las estrellas que cosechamos en esta página. ✨🐱",
@@ -912,5 +1017,62 @@ export const spiralCatalog = {
     ],
     video: "assets/videos/spiral_message.mp4",
     duration: 4000
+  },
+
+  "NEW_DAY_PROMPT": {
+    priority: 5,
+    text: [
+      "El sol ha salido y una nueva energía rodea este día. ¿Lista para comenzar, {{userName}}?"
+    ],
+    video: "assets/videos/spiral_message.mp4",
+    actionConfig: [
+      { label: "Empezar nuevo día", type: "START_NEW_DAY", variant: "highlighted", icon: "check" },
+      { label: "Mejor reviso antes", type: "REVIEW_PREVIOUS_DAY", variant: "normal", icon: "back" }
+    ]
+  },
+
+  "REVIEW_DAY_WAITING": {
+    priority: 1,
+    text: [
+      "Tómate tu tiempo para registrar lo de ayer. Cuando termines, avísame para empezar este hermoso nuevo día. ✨"
+    ],
+    video: "assets/videos/spiral_message.mp4",
+    actionConfig: [
+      { label: "Empezar nuevo día", type: "START_NEW_DAY", variant: "highlighted", icon: "check" }
+    ]
+  },
+
+  "PENDING_CARD_PROMPT": {
+    priority: 4,
+    text: [
+      "¡Prrr! Tienes una carta mágica vibrando en tu inventario. ¡Vamos a pegarla al álbum! 🔮"
+    ],
+    video: "assets/videos/spiral_message.mp4",
+    actionConfig: [
+      { label: "Ir al Álbum", type: "GO_TO_ALBUM", variant: "highlighted", icon: "next" }
+    ]
+  },
+
+  "DASHBOARD_FULL_MOON": {
+    priority: 4,
+    text: [
+      "¡Miau, ¡qué brillo! 🌕✨! Es Luna Llena, ¡Ganas 60 ⭐! y una carta para tu albúm."
+    ],
+    video: "assets/videos/spiral_message.mp4",
+    actionConfig: [
+      { label: "Recoger Carta", type: "CLAIM_MOON_REWARD", variant: "highlighted", icon: "star" }
+    ]
+  },
+
+  "RENEW_MOON_PROMPT": {
+    priority: 4,
+    text: [
+      "¡Wow, una carta mágica apareció! ¿Vamos al álbum a insertarla? ✨"
+    ],
+    video: "assets/videos/spiral_message.mp4",
+    actionConfig: [
+      { label: "Al Álbum", type: "GO_TO_ALBUM", variant: "highlighted", icon: "next" },
+      { label: "Mejor Luego", type: "RENEW_MOON_LATER", variant: "normal", icon: "cancel" }
+    ]
   }
-}
+};

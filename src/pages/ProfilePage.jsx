@@ -262,7 +262,7 @@ export function ProfilePage() {
           </Button>
         </div>
 
-        {/* 3. Zona de Pruebas (Debug) - OCULTA BAJO TAP SECRETO */}
+        {/* 3. Zona de Pruebas (Dev) - OCULTA POR DEFECTO */}
         {showDev && (
           <div className="w-full flex flex-col items-center gap-4 max-w-[340px] mt-8 opacity-70 hover:opacity-100 transition-opacity p-4 border border-primary/20 rounded-3xl bg-primary/5">
             <div className="flex items-center justify-between w-full">

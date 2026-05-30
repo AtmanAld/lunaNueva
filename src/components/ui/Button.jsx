@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 
 export function Button({ children, variant = "primary", className = "", ...props }) {
   // The 'No-Line' Rule: Rely on gradients and backdrop blurs
-  const baseStyles = "px-6 py-3 rounded-2xl font-medium transition-all duration-300 relative overflow-hidden flex items-center justify-center gap-2 outline-none";
+  const baseStyles = "px-6 py-3 rounded-2xl font-medium transition-all duration-300 relative overflow-hidden flex items-center justify-center gap-2 outline-none active:scale-[0.96]";
   
   const variants = {
     primary: "bg-gradient-to-br from-primary to-secondary text-on-primary-fixed shadow-[0_8px_24px_rgba(220,184,255,0.12)] hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(220,184,255,0.2)]",
@@ -16,7 +16,6 @@ export function Button({ children, variant = "primary", className = "", ...props
 
   return (
     <motion.button 
-      whileTap={props.disabled ? undefined : { scale: 0.95 }}
       className={`${baseStyles} ${variants[variant]} ${props.disabled ? 'opacity-40 pointer-events-none' : ''} ${className}`} 
       {...props}
     >

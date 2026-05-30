@@ -10,14 +10,13 @@ import { PageDepthWrapper, ActionModalOverlay } from '../components/ui/Interacti
 
 // --- ZUSTAND STORE ---
 import { useGameStore } from '../store/useGameStore';
-import { activityCatalog } from '../data/activityCatalog';
+import { selectActiveMessage } from '../store/slices/createMessageSlice';
 
 export function StorePage() {
   const globalStars = useGameStore(state => state.userStars);
   const purchaseItem = useGameStore(state => state.purchaseItem);
   const storeCategories = useGameStore(state => state.categories);
   const catalog = useGameStore(state => state.catalog);
-  const globalActivities = useGameStore(state => state.activities);
 
   const [activeCategory, setActiveCategory] = useState('Mascota');
 
@@ -26,8 +25,12 @@ export function StorePage() {
   const selectedProduct = useGameStore(state => state.activePurchaseItem);
   const purchaseQuantity = useGameStore(state => state.purchaseQuantity || 1);
   const setPurchaseState = useGameStore(state => state.setPurchaseState);
+  const updatePurchaseQuantity = useGameStore(state => state.updatePurchaseQuantity);
   const isDirectFlight = useGameStore(state => state.isDirectFlight);
   const navigate = useNavigate();
+
+  // --- MOTOR DE MENSAJES ---
+  const activeMessage = useGameStore(state => selectActiveMessage(state, 'store'));
 
   // Mapeo de catálogo de Zustand al formato visual
   const mappedCatalog = (catalog || []).map(item => ({
@@ -35,24 +38,7 @@ export function StorePage() {
     chips: (item.chips || []).map(c => typeof c === 'string' ? { text: c } : c)
   }));
 
-  // Actividades bloqueadas como productos (Uniendo estado con catálogo)
-  const purchasableActivities = (globalActivities || []).filter(a => !a.isUnlocked).map(act => {
-    const catalogInfo = activityCatalog.find(ac => ac.activityID === act.activityID);
-    if (!catalogInfo) return null;
-
-    return {
-      id: act.activityID,
-      name: catalogInfo.title,
-      icon: "🌟",
-      price: catalogInfo.price || 200,
-      category: "Actividad",
-      description: catalogInfo.activityDetails || "Una nueva actividad para tu rutina.",
-      detailMsg: catalogInfo.activityDetails || "Añade esta actividad para poder realizarla diariamente.",
-      chips: [{ text: `Ganas ${catalogInfo.stars}⭐` }, { text: 'Actividad' }],
-    };
-  }).filter(Boolean);
-
-  const allItems = [...mappedCatalog, ...purchasableActivities];
+  const allItems = [...mappedCatalog];
 
   // 1. FILTRAR CATEGORÍAS VACÍAS
   const availableCategories = (storeCategories || []).filter(cat =>
@@ -73,33 +59,16 @@ export function StorePage() {
     }
   }, [buyStep, selectedProduct, activeCategory]);
 
-  // Alerta local: Controla el aumento circular de la cantidad
-  const setPurchaseQuantityLocal = (newQty) => {
-    if (!selectedProduct) return;
 
-    // 1. Regla de límite de stock (Máximo 10 a la vez)
-    if (newQty > 10) {
-      setPurchaseState(buyStep, selectedProduct, 1);
-      return;
-    }
-
-    // 2. Regla de presupuesto (No permitir si no alcanza)
-    const nextPrice = selectedProduct.price * newQty;
-    if (globalStars < nextPrice) {
-      setPurchaseState(buyStep, selectedProduct, 1);
-      return;
-    }
-
-    // Si pasa ambas pruebas, guarda la cantidad
-    setPurchaseState(buyStep, selectedProduct, newQty);
-  };
 
   const handleBuyIntent = (item) => {
     useGameStore.setState({ isDirectFlight: false });
     if (globalStars >= item.price) {
       setPurchaseState('confirm_affordable', item, 1);
+      useGameStore.getState().enqueueMessage('store', 'STORE_CONFIRM_ITEM');
     } else {
       setPurchaseState('confirm_unaffordable', item, 1);
+      useGameStore.getState().enqueueMessage('store', 'STORE_CONFIRM_UNAFFORDABLE');
     }
   };
 
@@ -114,131 +83,31 @@ export function StorePage() {
         navigate('/spiral');
       }
       setPurchaseState('idle');
+      useGameStore.getState().dequeueMessage('store');
     }
   };
 
-  const handleDetail = () => setPurchaseState('detail_view', selectedProduct, purchaseQuantity);
-  const handleBackToConfirm = () => setPurchaseState('confirm_affordable', selectedProduct, purchaseQuantity);
-  const resetInteraction = () => setPurchaseState('idle');
-
-  // Máquina de estados visual de la Gaveta 3D
-  const getInteractionUI = () => {
-    if (buyStep === 'confirm_unaffordable') {
-      return {
-        message: `Miau, No tienes suficientes estrellas para comprar ${selectedProduct?.name}. Necesitas ${selectedProduct?.price}⭐.`,
-        video: "assets/videos/spiral_message.mp4",
-        content: (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center w-full mt-6 px-8 relative">
-            <div className="absolute inset-x-4 top-0 h-px bg-white/5" />
-            <Button onClick={resetInteraction} variant="none" className="w-full mt-6 py-3.5 bg-[#1E1A22] rounded-full border border-[#231F26] flex items-center justify-center gap-2 text-[#EADDFF] font-medium shadow-lg">
-              <Undo2 size={18} /> Muy bien
-            </Button>
-          </motion.div>
-        )
-      };
-    }
-
-    if (buyStep === 'detail_view') {
-      return {
-        message: selectedProduct?.detailMsg || "Detalle increíble de este producto para ti.",
-        video: "assets/videos/spiral_message.mp4",
-        content: (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center w-full mt-6 px-8 relative">
-            <div className="absolute inset-x-4 top-0 h-px bg-white/5" />
-            <div className="flex flex-col sm:flex-row w-full gap-3 mt-6">
-              <Button onClick={handleConfirmPurchase} variant="modal_highlighted" className="flex-1 !py-3.5 flex items-center justify-center gap-2">
-                <Check size={18} /> Comprar por {selectedProduct?.price}⭐
-              </Button>
-              <Button onClick={handleBackToConfirm} variant="modal_normal" className="flex-1 !py-3.5 flex items-center justify-center gap-2">
-                <Undo2 size={18} /> Regresar
-              </Button>
-            </div>
-          </motion.div>
-        )
-      }
-    }
-
-    if (buyStep === 'confirm_affordable') {
-      const totalPrice = selectedProduct?.price * purchaseQuantity;
-      const isAffordable = globalStars >= totalPrice;
-      // Solo sumamos "usos" si es de Mascotas
-      const showUsageChip = selectedProduct?.category === 'Mascota';
-
-      return {
-        message: `Miau, ${selectedProduct?.description}\n¿Qué cantidad compramos?\nCostaría: ${totalPrice}⭐`,
-        video: "assets/videos/spiral_message.mp4",
-        content: (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center w-full mt-4 px-2">
-
-            {/* Imagen Grande y Chips (Estilo Burbuja Inventario) */}
-            <div className="flex flex-col items-center w-full mb-8 pt-4 relative">
-              <div className="absolute inset-x-8 top-0 h-px bg-white/5" />
-              {selectedProduct?.category === 'Mascota' && (
-                  <Chip text={`${(selectedProduct.payload?.amount || 0) * purchaseQuantity} usos totales`} variant="secondary" />
-              )}
-
-              {/* Icono Clicable para aumentar cantidad */}
-              <motion.button
-                onClick={() => setPurchaseQuantityLocal(purchaseQuantity + 1)}
-                whileTap={{ scale: 1.15 }}
-                className="relative w-24 h-24 rounded-full bg-surface-container-high border border-white/5 shadow-[0_8px_24px_rgba(0,0,0,0.3)] flex items-center justify-center text-5xl my-6 group hover:bg-surface-container-highest cursor-pointer focus:outline-none"
-              >
-                <span className="filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)] group-hover:scale-110 transition-transform duration-300">{selectedProduct?.icon}</span>
-                {/* Badge Animado de Cantidad */}
-                <motion.span
-                  key={purchaseQuantity}
-                  initial={{ scale: 1.5, backgroundColor: "#DCB8FF" }}
-                  animate={{ scale: 1, backgroundColor: "#1D192B" }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[#1D192B] border-2 border-[#1E1A22] text-[#EADDFF] flex items-center justify-center text-sm font-bold shadow-lg z-10"
-                >
-                  {purchaseQuantity}
-                </motion.span>
-              </motion.button>
-
-              <div className="flex flex-wrap items-center justify-center gap-2 max-w-xs px-2">
-                {showUsageChip && (
-                  <span className="px-3 py-1 rounded-full bg-surface-container-high border border-outline-variant/10 shadow-sm text-[10px] uppercase font-bold tracking-wider text-on-surface-variant flex items-center gap-1">
-                    {purchaseQuantity > 1 ? `${purchaseQuantity} usos` : '1 uso'}
-                  </span>
-                )}
-                {selectedProduct?.chips?.map((chip, index) => {
-                  const chipText = typeof chip === 'string' ? chip : chip.text;
-                  return (
-                    <span key={chipText || index} className="px-3 py-1 rounded-full bg-surface-container-high border border-outline-variant/10 shadow-sm text-[10px] uppercase font-bold tracking-wider text-on-surface-variant flex items-center gap-1">
-                      {chipText}
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Botones de Acción */}
-            <div className="flex flex-col w-full gap-3 px-8">
-              <Button onClick={handleConfirmPurchase} variant={isAffordable ? "modal_highlighted" : "modal_normal"} className={!isAffordable ? 'opacity-50 pointer-events-none' : ''}>
-                <Check size={18} /> Comprar
-              </Button>
-              {selectedProduct?.category === 'Actividad' && (
-                <Button onClick={handleDetail} variant="modal_normal">
-                  <Search size={18} /> Detalle
-                </Button>
-              )}
-              <Button onClick={resetInteraction} variant="modal_normal">
-                <Undo2 size={18} /> Mejor luego
-              </Button>
-            </div>
-          </motion.div>
-        )
-      };
-    }
-
-    return { message: "", video: null, content: null };
+  const resetInteraction = () => {
+    setPurchaseState('idle');
+    useGameStore.getState().dequeueMessage('store');
   };
 
+  const handleGlobalAction = (action) => {
+    switch (action.type) {
+      case 'STORE_BUY':
+        handleConfirmPurchase();
+        break;
+      case 'STORE_CANCEL':
+        resetInteraction();
+        break;
+    }
+  };
 
+  const totalPrice = selectedProduct ? selectedProduct.price * purchaseQuantity : 0;
+  const showUsageChip = selectedProduct?.category === 'Mascota';
   return (
     <>
-      <PageDepthWrapper isActive={buyStep !== 'idle'} className="p-6 pt-6 pb-32 space-y-8 relative">
+      <PageDepthWrapper isActive={!!activeMessage} className="p-6 pt-6 pb-32 space-y-8 relative">
 
         {/* 1. Header Global Enmarcado */}
           <GlassCard 
@@ -308,9 +177,78 @@ export function StorePage() {
       </PageDepthWrapper>
 
       {/* GAVETA 3D DE TRANSACCIONES */}
-      <ActionModalOverlay isActive={buyStep !== 'idle'}>
-        <SpiralMessage message={getInteractionUI().message} video={getInteractionUI().video} isOverlayMode={true} delay={0} />
-        {getInteractionUI().content}
+      <ActionModalOverlay isActive={!!activeMessage}>
+        {activeMessage && (
+          <SpiralMessage 
+            message={activeMessage.text} 
+            bgImage="/bgSpiralBubble.png" 
+            video={activeMessage.video} 
+            isOverlayMode={true} 
+            centerContent={true}
+            delay={0}
+            actionConfig={activeMessage.actionConfig}
+            onAction={handleGlobalAction}
+            actionButton={
+              activeMessage.id === 'STORE_CONFIRM_ITEM' ? (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center w-full px-8 max-w-[340px] mx-auto">
+                  <div className="flex flex-col items-center w-full mb-8 pt-4 relative">
+                    <div className="absolute inset-x-8 top-0 h-px bg-white/5" />
+                    
+                    {/* Icono Clicable para aumentar cantidad */}
+                    <motion.button
+                      onClick={() => updatePurchaseQuantity(purchaseQuantity + 1)}
+                      whileTap={{ scale: 1.15 }}
+                      className="relative w-24 h-24 rounded-full bg-surface-container-high border border-white/5 shadow-[0_8px_24px_rgba(0,0,0,0.3)] flex items-center justify-center text-5xl my-6 group hover:bg-surface-container-highest cursor-pointer focus:outline-none"
+                    >
+                      <span className="filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)] group-hover:scale-110 transition-transform duration-300">{selectedProduct?.icon}</span>
+                      {/* Badge Animado de Cantidad */}
+                      <motion.span
+                        key={purchaseQuantity}
+                        initial={{ scale: 1.5, backgroundColor: "#DCB8FF" }}
+                        animate={{ scale: 1, backgroundColor: "#1D192B" }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                        className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[#1D192B] border-2 border-[#1E1A22] text-[#EADDFF] flex items-center justify-center text-sm font-bold shadow-lg z-10"
+                      >
+                        {purchaseQuantity}
+                      </motion.span>
+                    </motion.button>
+
+                    <div className="flex flex-wrap items-center justify-center gap-2 max-w-xs px-2 mt-2">
+                      {/* Badge Animado de Costo */}
+                      <motion.span
+                        key={`cost-${totalPrice}`}
+                        initial={{ scale: 1.2, backgroundColor: "#EADDFF", color: "#1D192B" }}
+                        animate={{ scale: 1, backgroundColor: "rgba(51,45,65,0.8)", color: "#EADDFF" }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                        className="px-3 py-1 rounded-full border border-primary/30 shadow-[0_0_10px_rgba(220,184,255,0.2)] text-[11px] uppercase font-bold tracking-wider flex items-center gap-1"
+                      >
+                        {totalPrice} ⭐
+                      </motion.span>
+
+                      {showUsageChip && (
+                        <span className="px-3 py-1 rounded-full bg-surface-container-high border border-outline-variant/10 shadow-sm text-[10px] uppercase font-bold tracking-wider text-on-surface-variant flex items-center gap-1">
+                          {purchaseQuantity > 1 ? `${purchaseQuantity} usos` : '1 uso'}
+                        </span>
+                      )}
+                      {selectedProduct?.chips?.map((chip, index) => {
+                        const chipText = typeof chip === 'string' ? chip : chip.text;
+                        return (
+                          <span key={chipText || index} className="px-3 py-1 rounded-full bg-surface-container-high border border-outline-variant/10 shadow-sm text-[10px] uppercase font-bold tracking-wider text-on-surface-variant flex items-center gap-1">
+                            {chipText}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </motion.div>
+              ) : activeMessage.id === 'STORE_CONFIRM_UNAFFORDABLE' ? (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center w-full px-8 max-w-[340px] mx-auto mb-4">
+                  <div className="w-full h-px bg-white/5" />
+                </motion.div>
+              ) : null
+            }
+          />
+        )}
       </ActionModalOverlay>
     </>
   );

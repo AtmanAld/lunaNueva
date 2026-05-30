@@ -6,6 +6,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 
 // --- ZUSTAND STORE ---
 import { useGameStore } from '../store/useGameStore';
+import { selectActiveMessage } from '../store/slices/createMessageSlice';
 
 // --- DATA ---
 import { spiralCatalog } from '../data/spiralCatalog';
@@ -22,12 +23,19 @@ export function SpiralPetPage() {
   const globalNeeds = useGameStore(state => state.needs);
   const inventory = useGameStore(state => state.petInventory);
   const usePetItem = useGameStore(state => state.usePetItem);
-  const ephemeralMessage = useGameStore(state => state.ephemeralMessage);
   const pendingReward = useGameStore(state => state.pendingReward);
   const totalIdleStars = useGameStore(state => state.totalIdleStars);
-  const setEphemeralMessage = useGameStore(state => state.setEphemeralMessage);
-  const clearEphemeralMessage = useGameStore(state => state.clearEphemeralMessage);
   const clearPendingReward = useGameStore(state => state.clearPendingReward);
+  
+  // Novedad: Selector Puro del Motor de Mensajes
+  const activeMessageFromEngine = useGameStore(state => selectActiveMessage(state, 'pet'));
+  const enqueueMessage = useGameStore(state => state.enqueueMessage);
+  const dequeueMessage = useGameStore(state => state.dequeueMessage);
+  const setScopedEphemeralMessage = useGameStore(state => state.setScopedEphemeralMessage);
+
+  // Mantenemos la variable antigua solo temporalmente para compatibilidad parcial si fuera necesaria,
+  // pero usaremos setScopedEphemeralMessage para las interacciones nuevas.
+  const setEphemeralMessage = useGameStore(state => state.setEphemeralMessage);
   const checkNeedsDegradation = useGameStore(state => state.checkNeedsDegradation);
   const handleGlobalAction = useGameStore(state => state.handleGlobalAction);
   const updateStars = useGameStore(state => state.updateStars);
@@ -42,8 +50,7 @@ export function SpiralPetPage() {
     setEphemeralMessage(null); // Limpieza de efímeros al entrar
   }, [checkNeedsDegradation, globalNeeds, setEphemeralMessage]);
 
-  // --- LÓGICA DEL ESTADO DERIVADO (Fondo de Spiral) ---
-  // Calcular el ID del ambiente basado en las necesidades
+  // --- LÓGICA DEL NUEVO MOTOR (Fondo de Spiral) ---
   const ambientId = useMemo(() => {
     if (globalNeeds.water <= complaintThresholds.water) return "SPIRAL_SED";
     if (globalNeeds.food <= complaintThresholds.food) return "SPIRAL_HAMBRE";
@@ -52,88 +59,46 @@ export function SpiralPetPage() {
     return "SPIRAL_FELIZ";
   }, [globalNeeds, complaintThresholds]);
 
-  // El fondo derivado ahora tiene 3 capas de prioridad locales
-  const [onDemandBg, setOnDemandBg] = useState(null); // Ej: "Confirmar Agua"
-
-  // Limpiamos onDemandBg si se monta/desmonta (al salir de la página)
+  // 1. Enviar el fondo ambiental (Prioridad 1)
   useEffect(() => {
-    return () => setOnDemandBg(null);
-  }, []);
+    enqueueMessage('pet_ambient', ambientId, {}, 'pet');
+    return () => dequeueMessage('pet_ambient');
+  }, [ambientId, enqueueMessage, dequeueMessage]);
 
-  const backgroundSpiral = useMemo(() => {
-    let result = null;
-
-    // Prioridad 1 Local: Mensaje de confirmación on-demand (Botones)
-    if (onDemandBg) {
-      const entry = spiralCatalog[onDemandBg.id];
-      if (entry) {
-        let text = Array.isArray(entry.text) ? entry.text[Math.floor(Math.random() * entry.text.length)] : entry.text;
-        // Inject itemName or itemId context if passed
-        text = text.replace('{{itemName}}', onDemandBg.extraData?.itemName || "");
-
-        // Reemplazar también en los botones (ej. para CONFIRM_WATER -> USE_PET_ITEM -> agua)
-        const actionConfig = entry.actionConfig?.map(ac => ({
-          ...ac,
-          data: typeof ac.data === 'string' && ac.data.includes('{{itemId}}')
-            ? ac.data.replace('{{itemId}}', onDemandBg.extraData?.itemId || "")
-            : ac.data
-        })) || [];
-
-        result = { ...entry, id: onDemandBg.id, text, actionConfig };
-      }
+  // 2. Enviar Idle Stars si hay (Prioridad 2)
+  useEffect(() => {
+    if (totalIdleStars > 0) {
+      enqueueMessage('idle_stars', 'IDLE_REWARDS', { stars: totalIdleStars }, 'pet');
+    } else {
+      dequeueMessage('idle_stars');
     }
+  }, [totalIdleStars, enqueueMessage, dequeueMessage]);
 
-    // Prioridad 2: Recompensa pendiente (Si salimos sin cobrar, nos espera)
-    else if (!result && pendingReward) {
-      const entry = spiralCatalog[pendingReward.type];
-      if (entry) {
-        let text = Array.isArray(entry.text) ? entry.text[Math.floor(Math.random() * entry.text.length)] : entry.text;
-        text = text.replace('{{stars}}', pendingReward.stars);
-        // Resolver configuración de botones con la cantidad de estrellas
-        const actionConfig = entry.actionConfig?.map(ac => ({
-          ...ac,
-          data: typeof ac.data === 'string' ? ac.data.replace('{{stars}}', pendingReward.stars) : ac.data
-        })) || [];
-        result = { ...entry, id: pendingReward.type, text, actionConfig };
-      }
+  // 3. Enviar Pending Reward si hay (Prioridad 3)
+  useEffect(() => {
+    if (pendingReward) {
+      enqueueMessage('pending_reward', pendingReward.type, { stars: pendingReward.stars }, 'pet');
+    } else {
+      dequeueMessage('pending_reward');
     }
+  }, [pendingReward, enqueueMessage, dequeueMessage]);
 
-    // Prioridad 3: Estrellas Idle acumuladas
-    else if (!result && totalIdleStars > 0) {
-      const entry = spiralCatalog["IDLE_REWARDS"];
-      if (entry) {
-        let text = Array.isArray(entry.text) ? entry.text[Math.floor(Math.random() * entry.text.length)] : entry.text;
-        text = text.replace('{{stars}}', totalIdleStars);
-        // Resolver configuración de botones con la cantidad de estrellas
-        const actionConfig = entry.actionConfig?.map(ac => ({
-          ...ac,
-          data: typeof ac.data === 'string' ? ac.data.replace('{{stars}}', totalIdleStars) : ac.data
-        })) || [];
-        result = { ...entry, id: "IDLE_REWARDS", text, actionConfig };
-      }
-    }
+  // Limpieza de interacciones en cola al desmontar
+  useEffect(() => {
+    return () => dequeueMessage('pet_interaction');
+  }, [dequeueMessage]);
 
-    // Prioridad 4: Necesidades de Spiral (Fondo Normal Ambiental)
-    if (!result) {
-      const entry = spiralCatalog[ambientId];
-      if (entry) {
-        let text = Array.isArray(entry.text) ? entry.text[Math.floor(Math.random() * entry.text.length)] : entry.text;
-        result = { ...entry, id: ambientId, text };
-      }
-    }
-
-    if (result) {
-      // Reemplazar {{userName}} para CUALQUIER prioridad
-      result.text = result.text.replace(/\{\{userName\}\}/g, useGameStore.getState().userName || "Amelia");
-      return result;
-    }
-
-    return null;
-  }, [onDemandBg, pendingReward, ambientId, totalIdleStars]);
-
-  const activeMessage = isTransitioning 
-    ? { text: transitionText, video: transitionVideo, actionConfig: [] } 
-    : (ephemeralMessage || backgroundSpiral);
+  const activeMessage = isTransitioning
+    ? { text: transitionText, video: transitionVideo, actionConfig: [] }
+    : (activeMessageFromEngine || {
+        // Fallback visual para el primerísimo render antes de que se llene la cola
+        id: ambientId,
+        text: Array.isArray(spiralCatalog[ambientId]?.text) 
+          ? spiralCatalog[ambientId].text[0].replace(/\{\{userName\}\}/g, "Amelia") 
+          : "Prrr...",
+        video: spiralCatalog[ambientId]?.video,
+        actionConfig: []
+      });
 
   // Mapeamos el estado global a la configuración visual
   const petNeeds = PET_NEEDS_CONFIG.map(config => ({
@@ -147,11 +112,11 @@ export function SpiralPetPage() {
 
   // --- SINCRONIZACIÓN DE MENSAJE Y SELECCIÓN ---
   useEffect(() => {
-    // Si el mensaje efímero o el onDemand desaparecen, deseleccionamos el ítem
-    if (!ephemeralMessage && !onDemandBg) {
+    // Si no estamos mostrando un mensaje de interacción o efímero sobre el ítem, lo deseleccionamos
+    if (activeMessage?.source !== 'pet_interaction' && activeMessage?.source !== 'ephemeral_pet') {
       setSelectedItemId(null);
     }
-  }, [ephemeralMessage, onDemandBg]);
+  }, [activeMessage]);
 
   // --- LÓGICA DE INTERACCIÓN REACTIVA ---
   const handleItemSelect = (item) => {
@@ -160,7 +125,7 @@ export function SpiralPetPage() {
 
     // 2. Si no hay stock, ir a la tienda (Efímero)
     if (item.quantity === 0) {
-      setEphemeralMessage("GO_TO_STORE_NO_ITEM", { itemId: item.id });
+      setScopedEphemeralMessage('ephemeral_pet', "GO_TO_STORE_NO_ITEM", { itemId: item.id }, 'pet');
       return;
     }
 
@@ -178,7 +143,7 @@ export function SpiralPetPage() {
       else if (targetNeedId === 'clean') refusalId = "NO_NEED_WASH";
       else if (targetNeedId === 'play') refusalId = "NO_NEED_PLAY";
 
-      setEphemeralMessage(refusalId, { itemName: item.name });
+      setScopedEphemeralMessage('ephemeral_pet', refusalId, { itemName: item.name }, 'pet');
     } else {
       // CONFIRMACIÓN: Spiral quiere el ítem (Este ES FONDO TEMPORAL, espera interacción)
       let confirmId = "SPIRAL_FELIZ";
@@ -187,9 +152,9 @@ export function SpiralPetPage() {
       else if (targetNeedId === 'clean') confirmId = "CONFIRM_WASH";
       else if (targetNeedId === 'play') confirmId = "CONFIRM_PLAY";
 
-      // Borramos posibles efímeros previos y ponemos el fondo en espera
-      useGameStore.getState().clearEphemeralMessage();
-      setOnDemandBg({ id: confirmId, extraData: { itemId: item.id } });
+      // Borramos posibles efímeros previos y encolamos la interacción (Prioridad 2)
+      dequeueMessage('ephemeral_pet');
+      enqueueMessage('pet_interaction', confirmId, { itemId: item.id }, 'pet');
     }
   };
 
@@ -233,8 +198,8 @@ export function SpiralPetPage() {
       setTimeout(() => setGlowingNeedId(null), 1500);
       setSelectedItemId(null);
 
-      // Borramos el fondo on-demand para que el "Gracias" pueda emerger
-      setOnDemandBg(null);
+      // Borramos el fondo on-demand
+      dequeueMessage('pet_interaction');
 
       // Acción Real (Esto creará el pendingReward invisiblemente)
       usePetItem(itemId);
@@ -246,8 +211,8 @@ export function SpiralPetPage() {
       handleGlobalAction(action);
     } else if (action.type === 'CANCEL') {
       setSelectedItemId(null);
-      setOnDemandBg(null);
-      clearEphemeralMessage();
+      dequeueMessage('pet_interaction');
+      dequeueMessage('ephemeral_pet');
     }
   };
 
@@ -321,6 +286,7 @@ export function SpiralPetPage() {
             tailPosition="top-center"
             isOverlayMode={true}
             message={activeMessage?.text}
+            bgImage="/bgSpiralBubble.png"
             actionConfig={[...(activeMessage?.actionConfig || [])].sort((a, b) => {
               if (a.variant === 'highlighted') return 1;
               if (b.variant === 'highlighted') return -1;

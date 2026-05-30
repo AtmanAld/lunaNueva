@@ -6,6 +6,7 @@ import { createDashboardSlice } from './slices/createDashboardSlice';
 import { createPetSlice } from './slices/createPetSlice';
 import { createStoreSlice } from './slices/createStoreSlice';
 import { createAlbumSlice } from './slices/createAlbumSlice';
+import { createMessageSlice } from './slices/createMessageSlice';
 
 export const useGameStore = create(
   persist(
@@ -14,7 +15,8 @@ export const useGameStore = create(
       ...createDashboardSlice(...a),
       ...createPetSlice(...a),
       ...createStoreSlice(...a),
-      ...createAlbumSlice(...a)
+      ...createAlbumSlice(...a),
+      ...createMessageSlice(...a)
     }),
     {
       name: 'luna-nueva-storage',
@@ -22,7 +24,7 @@ export const useGameStore = create(
         // Excluimos del guardado local todo lo que sea "Configuración/Catálogo"
         // y los mensajes efímeros que no deben persistir entre sesiones.
         // `pendingReward` sí se guardará en "rest".
-        const { catalog, categories, userLevels, ephemeralMessage, ambientMessage, spiralMessage, ...rest } = state;
+        const { catalog, categories, userLevels, ephemeralMessage, ambientMessage, spiralMessage, messageQueue, scopedEphemeralTimerIds, ...rest } = state;
         return rest;
       },
       migrate: (persistedState, version) => {

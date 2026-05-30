@@ -34,12 +34,12 @@ export const createDashboardSlice = (set, get) => ({
       const catalogInfo = activityCatalog.find(ac => Number(ac.activityID) === Number(act.activityID));
       const intervalDays = catalogInfo ? (catalogInfo.intervalCompletions || 1) : 1;
       const daysPassed = calculateDaysDifference(act.periodStartDate, today);
-      
+
       if (daysPassed >= intervalDays) {
-        return { 
-          ...act, 
-          completions: 0, 
-          fullyCompleted: false, 
+        return {
+          ...act,
+          completions: 0,
+          fullyCompleted: false,
           usedForRitual: false,
           periodStartDate: today
         };
@@ -360,7 +360,9 @@ export const createDashboardSlice = (set, get) => ({
         completions: 0,
         fullyCompleted: false,
         isUnlocked: true,
-        isActive: true
+        isActive: true,
+        usedForRitual: false,
+        periodStartDate: getLocalDateString()
       }));
 
     let nextStateUpdates = {};

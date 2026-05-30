@@ -5,9 +5,30 @@ export const createStoreSlice = (set, get) => ({
   activePurchaseItem: null,
   purchaseStep: 'idle', // 'idle' | 'confirm_affordable' | 'confirm_unaffordable' | 'detail_view'
   isDirectFlight: false,
-  
+
   setPurchaseState: (step, item = null, qty = 1) => set({ purchaseStep: step, activePurchaseItem: item, purchaseQuantity: qty }),
-  
+
+  updatePurchaseQuantity: (newQty) => {
+    const state = get();
+    if (!state.activePurchaseItem) return;
+
+    // 1. Regla de límite de stock (Máximo 10 a la vez)
+    if (newQty > 10) {
+      set({ purchaseQuantity: 1 });
+      return;
+    }
+
+    // 2. Regla de presupuesto (No permitir si no alcanza)
+    const nextPrice = (state.activePurchaseItem.price || 100) * newQty;
+    if (state.userStars < nextPrice) {
+      set({ purchaseQuantity: 1 });
+      return;
+    }
+
+    // Si pasa ambas pruebas, guarda la cantidad
+    set({ purchaseQuantity: newQty });
+  },
+
   prepareDirectPurchase: (productId) => {
     const state = get();
     // 1. Encontrar el producto
@@ -18,7 +39,7 @@ export const createStoreSlice = (set, get) => ({
         product = { ...activityInfo, category: 'Actividad' };
       }
     }
-    
+
     // 2. Configurar el estado global del modal si se encuentra
     if (product) {
       const basePrice = product.price || 100;

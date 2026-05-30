@@ -65,12 +65,26 @@ export const activityCatalog = [
     category: "Finanzas",
     value: 1,
     valueUnit: "vez",
-    stars: 30,
+    stars: 130,
     maxCompletions: 1,
     intervalCompletions: 28,
     intervalName: "al mes",
     activityDetails: "Realiza tus cobros o transacciones financieras pendientes.",
     phasePoints: 5
+  },
+  {
+    activityID: 11,
+    setID: 2,
+    title: "Comida económica",
+    category: "Finanzas",
+    value: 1,
+    valueUnit: "vez",
+    stars: 50,
+    maxCompletions: 1,
+    intervalCompletions: 3,
+    intervalName: "a la semana",
+    activityDetails: "Elige una opción de comida económica para cuidar tus finanzas.",
+    phasePoints: 4
   },
   {
     activityID: 6,

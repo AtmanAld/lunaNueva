@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Check, X, ArrowLeft, Store, ChevronRight, Star } from 'lucide-react';
+import { Check, X, ArrowLeft, Store, ChevronRight, Star, Settings, Undo2 } from 'lucide-react';
 
 import { Button } from './Button';
 
@@ -9,7 +9,9 @@ const ICON_MAP = {
   back: ArrowLeft,
   store: Store,
   next: ChevronRight,
-  star: Star
+  star: Star,
+  settings: Settings,
+  undo: Undo2
 };
 
 export function SpiralMessage({
@@ -23,6 +25,8 @@ export function SpiralMessage({
   variant = 'default', // 'default' | 'bubble-only'
   tailPosition = 'bottom-left', // 'bottom-left' | 'top-center'
   disabled = false,
+  bgImage = null,
+  centerContent = false, // Propiedad agregada para no indentar (mejora V4)
   className = ''
 }) {
   // Separamos el string para animar en ráfaga (typewriter)
@@ -61,7 +65,10 @@ export function SpiralMessage({
         )}
 
         {/* Burbuja de Mensaje */}
-        <div className={`relative bg-surface-container-high px-5 py-3.5 rounded-[1.5rem] shadow-[0_12px_32px_rgba(0,0,0,0.4)] border border-white/5 flex-1 z-10 flex flex-col justify-center ${isBubbleOnly ? 'text-center max-w-[320px]' : 'rounded-bl-[4px]'}`}>
+        <div 
+          className={`relative px-5 py-3.5 rounded-[1.5rem] shadow-[0_12px_32px_rgba(0,0,0,0.4)] border border-white/5 flex-1 z-10 flex flex-col justify-center ${!bgImage ? 'bg-surface-container-high' : ''} ${isBubbleOnly ? 'text-center max-w-[320px]' : 'rounded-bl-[4px]'}`}
+          style={bgImage ? { backgroundImage: `url('${bgImage}')`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+        >
           {/* Colita de la burbuja (Tail) */}
           {tailPosition === 'bottom-left' && (
             <div className="absolute -left-1.5 bottom-3 w-4 h-4 bg-surface-container-high rounded-[2px] border-b border-l border-white/5 rotate-45 -z-10" />
@@ -88,30 +95,30 @@ export function SpiralMessage({
 
       {/* Custom Action Button (from AlbumPage for example) */}
       {actionButton && (
-        <div className={`w-full ${isBubbleOnly ? 'flex justify-center' : 'pl-[3.75rem]'} pointer-events-auto flex gap-2 flex-wrap`}>
+        <div className={`w-full ${isBubbleOnly || centerContent ? 'flex justify-center' : 'pl-[3.75rem]'} pointer-events-auto flex gap-2 flex-wrap`}>
           {actionButton}
         </div>
       )}
 
-      {/* Botones de Acción Condicionales - Espacio reservado estructuralmente para evitar saltos */}
+      {/* Botones de Acción Condicionales */}
       {actionConfig && actionConfig.length > 0 && (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: disabled ? 0 : 1, scale: disabled ? 0.95 : 1 }}
           transition={{ delay: 0.8, duration: 0.4 }}
-          className={`w-full ${isBubbleOnly ? 'px-10' : 'pl-[4.25rem]'} ${disabled ? 'pointer-events-none' : 'pointer-events-auto'} flex flex-col gap-3 mt-1 transition-opacity duration-300`}
+          className={`w-full ${isBubbleOnly || centerContent ? 'px-8 max-w-[340px] mx-auto' : 'pl-[4.25rem]'} ${disabled ? 'pointer-events-none' : 'pointer-events-auto'} flex flex-col gap-3 mt-1`}
         >
           {actionConfig.map((action, idx) => {
             const Icon = action.icon ? ICON_MAP[action.icon] : null;
+            const isModalButton = action.variant && action.variant.startsWith('modal_');
             return (
               <Button
                 key={idx}
                 onClick={() => !disabled && onAction && onAction(action)}
-                variant={(action.variant === 'primary' || action.variant === 'highlighted') ? 'primary' : 'normal'}
-                className="w-full py-2.5 rounded-[1.5rem] font-bold tracking-widest uppercase text-[10px]"
-                disabled={disabled}
+                variant={isModalButton ? action.variant : ((action.variant === 'primary' || action.variant === 'highlighted') ? 'primary' : 'normal')}
+                className={isModalButton ? "w-full mb-1" : "w-full py-2.5 rounded-[1.5rem] font-bold tracking-widest uppercase text-[10px]"}
               >
-                {Icon && <Icon size={16} strokeWidth={2.5} />}
+                {Icon && <Icon size={isModalButton ? 18 : 16} strokeWidth={2.5} className={isModalButton ? "mr-1 mb-0.5 inline-block" : ""} />}
                 {action.label}
               </Button>
             );
