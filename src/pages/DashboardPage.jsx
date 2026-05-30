@@ -819,31 +819,18 @@ export function DashboardPage() {
 
       {/* Capa de modales Interactivos */}
       <ActionModalOverlay isActive={isModalActive}>
-        <SpiralMessage
-          message={activeMessage?.text || ""}
-          isOverlayMode={true}
-          delay={0}
-          video={activeMessage?.video}
-          bgImage="/bgSpiralBubble.png"
-        />
-        <div className="flex flex-col w-full gap-3 px-8 max-w-[340px] mx-auto mt-6 pb-4">
-          {activeMessage?.actionConfig?.map((action, idx) => {
-            const Icon = action.icon ? ICON_MAP[action.icon] : null;
-            return (
-              <button
-                key={idx}
-                onClick={() => handleGlobalAction(action)}
-                className={`w-full py-3 rounded-[1.5rem] font-bold tracking-widest uppercase text-[11px] transition-all flex items-center justify-center gap-2 ${(action.variant === 'primary' || action.variant === 'highlighted')
-                  ? 'bg-primary-fixed text-on-primary-fixed shadow-lg hover:scale-[1.02]'
-                  : 'bg-surface-container-highest/50 text-on-surface border border-white/5 hover:bg-surface-container-highest'
-                  }`}
-              >
-                {Icon && <Icon size={16} strokeWidth={2.5} />}
-                {action.label}
-              </button>
-            );
-          })}
-        </div>
+        {activeMessage && (
+          <SpiralMessage
+            message={activeMessage.text || ""}
+            isOverlayMode={true}
+            centerContent={true}
+            delay={0}
+            video={activeMessage.video}
+            bgImage="/bgSpiralBubble.png"
+            actionConfig={activeMessage.actionConfig || []}
+            onAction={handleGlobalAction}
+          />
+        )}
       </ActionModalOverlay>
     </>
   );

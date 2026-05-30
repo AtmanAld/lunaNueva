@@ -2,24 +2,14 @@
 
 Este documento detalla la arquitectura técnica del motor de mensajes de Luna Nueva. Su propósito es servir como la fuente única de verdad (Single Source of Truth) para la implementación de cualquier nuevo mensaje, diálogo o interacción en el futuro, garantizando que no se rompa la arquitectura ni se introduzca lógica "spaghetti" en la UI.
 
-## Filosofía Principal
-**"Zustand es el cerebro y es inteligente; la UI es tonta".**
-La Interfaz de Usuario (React/JSX) NUNCA debe calcular probabilidades, jerarquías ni seleccionar variables al azar. Todo cálculo y decisión de prioridad debe suceder en el momento exacto en que un mensaje se encola en Zustand. La UI simplemente se suscribe al estado y pinta exactamente el objeto que Zustand le entrega.
-
-Para referirnos a este conjunto, te propongo llamarlo "Motor Spiral" (o "Spiral Engine"). Y cuando hablemos de sus partes específicas, las llamamos por su nombre técnico:
-
-El Catálogo: spiralCatalog.js (Donde viven los textos e IDs).
-La Lógica (Engine): Zustand + enqueueMessage (La fila de prioridades, los tiempos).
-El Visualizador: <SpiralMessage /> (El componente de React que dibuja la burbuja y el gato).
-
----
-
 ## 1. Arquitectura Central
 
 ### Archivos Clave
 1. **`src/store/slices/createMessageSlice.js` (El Cerebro):** Contiene el arreglo global `messageQueue`, la lógica de encolado (`enqueueMessage`), y el **Selector Puro** (`selectActiveMessage`).
 2. **`src/data/spiralCatalog.js` (El Catálogo):** La base de datos cruda de todos los mensajes, textos (incluidos los arrays de aleatoriedad), videos y botones. TODO texto mostrado debe existir aquí.
 3. **`src/components/ui/SpiralMessage.jsx` (El Pintor):** Componente de UI que recibe las propiedades y las dibuja en pantalla.
+
+---
 
 ### El Selector Puro (`selectActiveMessage`)
 Es la única vía por la cual la UI consulta qué mensaje mostrar.
@@ -131,10 +121,93 @@ Para evitar colisiones o duplicar contextos bajo nombres similares (ej. `'mascot
 * **`'store'`**: La tienda mágica.
 * **`'album'`**: La página de la enciclopedia o cartas mágicas.
 
+!Importante: Si estamos creando una nueva sección, sugiéreme la creación de un nuevo scope, pues cada uno de estos scopes corresponden a una sección particular de la aplicación. Y un scope debe tener un nombre "único" (no repetir nombres de secciones existentes)..
+
 ---
 
-## 9. Errores Comunes a Evitar (Lecciones Aprendidas)
-
-> [!WARNING]
-> **No forzar el motor en vistas "tontas" (Dumb UI)**
-> Es vital respetar las decisiones de diseño sobre el alcance del motor. Si se acordó que componentes como `StorePage` o `ProfilePage` mantengan una lógica UI "tonta" (que consuman variables globales legacy directas sin entrar a la cola), **no debes intentar forzar el uso de `enqueueMessage`** allí ni purgar su código en los *slices*. Intentar "limpiar" esas funciones legacy (`setSpiralMessage`) en páginas que no usan el motor nuevo causará que los componentes crasheen buscando métodos inexistentes o generen bucles infinitos en Zustand al modificar el estado incorrectamente. Respeta siempre los *scopes* y los límites del motor.
+## 9. Guía Rápida de Implementación (Cheat Sheet)
+¿Necesitas agregar un nuevo mensaje o modal a la aplicación usando el Motor Spiral? Sigue estos sencillos pasos según tu caso de uso:
+### Paso 1: Registrar el mensaje en `spiralCatalog.js`
+Toda interacción comienza agregando una entrada en el catálogo de mensajes.
+**Caso A: Mensaje efímero simple (No bloquea, desaparece solo)**
+```javascript
+  MIAU_HAMBRE: {
+    text: "Miau, ¡tengo mucha hambre!",
+    priority: 3, // Alerta Efímera
+    duration: 3000 // Desaparece en 3 segundos
+  },
+```
+**Caso B: Modal Bloqueante (Requiere interacción)**
+```javascript
+  RECOMPENSA_SECRETA: {
+    text: "¡Felicidades {{userName}}! Encontraste un secreto.",
+    priority: 4, // Modal
+    actionConfig: [
+      { label: "Reclamar", type: "RECLAMAR_SECRETO", variant: "modal_highlighted", icon: "star" }
+    ]
+  },
+```
+### Paso 2: Invocar el mensaje desde la UI o Zustand
+**Caso A: Lanzar un mensaje efímero (Ej: Al pulsar un botón sin fondos)**
+Usa `setScopedEphemeralMessage`. El motor se encarga de mostrarlo y borrarlo automáticamente.
+```javascript
+// Desde Zustand o dentro de un componente React:
+useGameStore.getState().setScopedEphemeralMessage(
+  'hambre_alert', // Source (ID único para identificar de dónde viene)
+  'MIAU_HAMBRE',  // ID del Catálogo
+  {},             // Variables extra (vacío si no hay)
+  'pet'           // Scope (dónde aparece)
+);
+```
+**Caso B: Lanzar un Modal persistente (Ej: Evento de Recompensa)**
+Usa `enqueueMessage`. El mensaje NO desaparecerá hasta que el usuario interactúe y tú lo borres.
+```javascript
+useGameStore.getState().enqueueMessage(
+  'secreto_evento',      // Source
+  'RECOMPENSA_SECRETA',  // ID del Catálogo
+  { userName: "Bruja" }, // Inyección de variables
+  'dashboard'            // Scope
+);
+```
+### Paso 3: Dibujar el mensaje en la Interfaz (JSX)
+En el componente correspondiente al `scope` (ej. DashboardPage.jsx), asegúrate de que estás usando el selector puro y pasando los datos a `<SpiralMessage>`.
+**Para Mensajes Efímeros/Flotantes (Fondo):**
+```jsx
+const activeMessage = useGameStore(state => selectActiveMessage(state, 'dashboard'));
+{/* Se dibuja solo si no hay un modal bloqueante activo */}
+{!isModalActive && activeMessage && (
+  <SpiralMessage
+    message={activeMessage.text}
+    video={activeMessage.video}
+    // ... config básica
+  />
+)}
+```
+**Para Modales Bloqueantes:**
+La vista delega TODO el diseño del botón a SpiralMessage mediante `centerContent` y `actionConfig`.
+```jsx
+<ActionModalOverlay isActive={isModalActive}>
+  {activeMessage && (
+    <SpiralMessage
+      message={activeMessage.text}
+      isOverlayMode={true}
+      centerContent={true} // <-- CLAVE: SpiralMessage dibuja los botones al centro
+      actionConfig={activeMessage.actionConfig || []}
+      onAction={handleGlobalAction}
+      // ... config de modal
+    />
+  )}
+</ActionModalOverlay>
+```
+### Paso 4: Manejar la acción (Para los Modales)
+Cuando el usuario presiona el botón, `<SpiralMessage>` llama a `onAction` (ej. `handleGlobalAction`). Aquí debes ejecutar la lógica de la recompensa y **muy importante**, decirle al motor que ya puede borrar el mensaje usando `dequeueMessage`.
+```javascript
+const handleGlobalAction = (action) => {
+  if (action.type === 'RECLAMAR_SECRETO') {
+    // 1. Ejecutas la lógica del juego (dar monedas, etc)
+    console.log("Secreto reclamado");
+    
+    // 2. Eliminas el mensaje de la cola manualmente usando su 'source'
+    useGameStore.getState().dequeueMessage('secreto_evento');
+  }
+};
