@@ -32,7 +32,12 @@ export const collectionIndex = [
       { nodeId: "m_ir_a_cobrar", next: null },
       { nodeId: "m_comida_economica", next: null },
       { nodeId: "m_lavar_ropa", next: null },
-      { nodeId: "m_jugar", next: null }
+      { nodeId: "m_jugar", next: null },
+      { nodeId: "m_masaje_corazon_nuca", next: null },
+      { nodeId: "m_manualidades", next: null },
+      { nodeId: "m_respiracion_cuadrada", next: null },
+      { nodeId: "m_masaje_orejas", next: null },
+      { nodeId: "m_ejercicios_nervio_vago", next: null }
     ]
   },
   {
@@ -49,7 +54,8 @@ export const collectionIndex = [
     nodes: [
       { nodeId: "m_colorear_tarot", next: null },
       { nodeId: "m_subir_tiktok", next: null },
-      { nodeId: "m_dormir_temprano", next: null }
+      { nodeId: "m_dormir_temprano", next: null },
+      { nodeId: "m_ver_series_netflix", next: null }
     ]
   },
   {

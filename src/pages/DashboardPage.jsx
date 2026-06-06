@@ -339,6 +339,7 @@ export function DashboardPage() {
     if (isFullMoonLocked && !isPersistedCelebration) {
       const { isFull } = getLatestUnlockedPageStatus();
       if (!isFull) {
+        dequeueMessage('dash_full_moon_blocker');
         enqueueMessage('dash_full_moon', 'DASHBOARD_FULL_MOON', {}, 'dashboard');
       } else {
         const state = useGameStore.getState();

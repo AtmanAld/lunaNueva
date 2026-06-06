@@ -210,3 +210,38 @@ export const createEngineSlice = (set, get) => ({
     });
   }
 });
+
+// Selector puro para obtener la data cruzada estática + dinámica
+export const selectMissionNode = (state, nodeId) => {
+  const staticData = missionCatalog[nodeId];
+  if (!staticData) return null;
+
+  let dynamicNode = null;
+  let parentCollectionId = null;
+  
+  if (state.engineState?.collections) {
+    for (const [colId, colData] of Object.entries(state.engineState.collections)) {
+      if (colData.nodesState && colData.nodesState[nodeId]) {
+        dynamicNode = colData.nodesState[nodeId];
+        parentCollectionId = colId;
+        break;
+      }
+    }
+  }
+
+  let isAvailable = true;
+  if (staticData.availability?.requiresCost) {
+    const required = staticData.availability.requiresCost[0];
+    if (required.item === "polvo_lunar") {
+        const currentDust = state.albumItems?.polvo_lunar || 0;
+        if (currentDust < required.amount) isAvailable = false;
+    }
+  }
+
+  return {
+    node: dynamicNode || { status: "active", progress: 0, cooldownRemaining: 0 },
+    staticData,
+    parentCollectionId,
+    isAvailable
+  };
+};

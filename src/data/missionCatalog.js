@@ -197,6 +197,114 @@ export const missionCatalog = {
     },
     content: { hasMultimedia: false }
   },
+  m_ver_series_netflix: {
+    id: "m_ver_series_netflix",
+    meta: {
+      title: "Ver series en Netflix",
+      description: "Toma un merecido descanso de una hora para ver tu serie favorita en Netflix.",
+      category: "Entretenimiento"
+    },
+    availability: { timeWindow: { activeDays: null } },
+    execution: {
+      objectiveType: "interaction",
+      targetValue: 1,
+      recurrence: { isRepeatable: true, resetType: "calendar", cooldownDays: 1, maxCompletions: 4 }
+    },
+    outcomes: {
+      onComplete: { currencies: [{ type: "stars", amount: 10 }], points: [{ type: "moon_points", amount: 1 }] }
+    },
+    content: { hasMultimedia: false }
+  },
+  m_masaje_corazon_nuca: {
+    id: "m_masaje_corazon_nuca",
+    meta: {
+      title: "Masaje de corazón-nuca (5 min)",
+      description: "Relájate y estimula tu nervio vago con un suave masaje de 5 minutos desde el pecho hasta la nuca.",
+      category: "Nervio vago"
+    },
+    availability: { timeWindow: { activeDays: null } },
+    execution: {
+      objectiveType: "interaction",
+      targetValue: 1,
+      recurrence: { isRepeatable: true, resetType: "calendar", cooldownDays: 1, maxCompletions: 1 }
+    },
+    outcomes: {
+      onComplete: { currencies: [{ type: "stars", amount: 10 }], points: [{ type: "moon_points", amount: 1 }] }
+    },
+    content: { hasMultimedia: false }
+  },
+  m_manualidades: {
+    id: "m_manualidades",
+    meta: {
+      title: "Manualidades",
+      description: "Dedica una hora a crear, pintar o construir algo con tus manos para dejar fluir tu imaginación.",
+      category: "Creatividad"
+    },
+    availability: { timeWindow: { activeDays: null } },
+    execution: {
+      objectiveType: "interaction",
+      targetValue: 1,
+      recurrence: { isRepeatable: true, resetType: "calendar", cooldownDays: 1, maxCompletions: 3 }
+    },
+    outcomes: {
+      onComplete: { currencies: [{ type: "stars", amount: 40 }], points: [{ type: "moon_points", amount: 8 }] }
+    },
+    content: { hasMultimedia: false }
+  },
+  m_respiracion_cuadrada: {
+    id: "m_respiracion_cuadrada",
+    meta: {
+      title: "Respiración cuadrada",
+      description: "Realiza ciclos de respiración cuadrada para calmar tu sistema nervioso y encontrar tu centro.",
+      category: "Nervio vago"
+    },
+    availability: { timeWindow: { activeDays: null } },
+    execution: {
+      objectiveType: "interaction",
+      targetValue: 1,
+      recurrence: { isRepeatable: true, resetType: "calendar", cooldownDays: 1, maxCompletions: 1 }
+    },
+    outcomes: {
+      onComplete: { currencies: [{ type: "stars", amount: 10 }], points: [{ type: "moon_points", amount: 1 }] }
+    },
+    content: { hasMultimedia: false }
+  },
+  m_masaje_orejas: {
+    id: "m_masaje_orejas",
+    meta: {
+      title: "Masaje en las orejas",
+      description: "Frota y masajea suavemente tus orejas para estimular el nervio vago y liberar la tensión acumulada.",
+      category: "Nervio vago"
+    },
+    availability: { timeWindow: { activeDays: null } },
+    execution: {
+      objectiveType: "interaction",
+      targetValue: 1,
+      recurrence: { isRepeatable: true, resetType: "calendar", cooldownDays: 1, maxCompletions: 1 }
+    },
+    outcomes: {
+      onComplete: { currencies: [{ type: "stars", amount: 10 }], points: [{ type: "moon_points", amount: 1 }] }
+    },
+    content: { hasMultimedia: false }
+  },
+  m_ejercicios_nervio_vago: {
+    id: "m_ejercicios_nervio_vago",
+    meta: {
+      title: "Ejercicios nervio vago",
+      description: "Realiza movimientos y ejercicios específicos para tonificar tu nervio vago, promoviendo una relajación profunda.",
+      category: "Nervio vago"
+    },
+    availability: { timeWindow: { activeDays: null } },
+    execution: {
+      objectiveType: "interaction",
+      targetValue: 1,
+      recurrence: { isRepeatable: true, resetType: "calendar", cooldownDays: 1, maxCompletions: 1 }
+    },
+    outcomes: {
+      onComplete: { currencies: [{ type: "stars", amount: 10 }], points: [{ type: "moon_points", amount: 1 }] }
+    },
+    content: { hasMultimedia: false }
+  },
   m_consumir_polvo_lunar: {
     id: "m_consumir_polvo_lunar",
     meta: {

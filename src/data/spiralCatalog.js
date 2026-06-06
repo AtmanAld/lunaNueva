@@ -898,26 +898,7 @@ export const spiralCatalog = {
       { label: "Ir al álbum", type: "NAVIGATE_ALBUM", variant: "highlighted", icon: "next" }
     ]
   },
-  "SPIRAL_GIFT_STARS": {
-    priority: 3,
-    text: [
-      "¡Miau! Tu página del álbum ya está 100% llena. Como recompensa, ¡Spiral te regala {{stars}} ⭐ para que alcances las 360 estrellas y puedas comprar Polvo Lunar en la tienda! 🎁✨"
-    ],
-    video: "assets/videos/spiral_message.mp4",
-    actionConfig: [
-      { label: "¡Muchas gracias, Spiral!", type: "CANCEL", variant: "highlighted", icon: "stars" }
-    ]
-  },
-  "ALBUM_PAGE_COMPLETE_LOCK": {
-    priority: 3,
-    text: [
-      "¡Miau! Esta página ya está completa al 100%. Debes desbloquear la siguiente página en el álbum para poder recibir más cartas de las celebraciones de Luna Llena. 🐾📖"
-    ],
-    video: "assets/videos/spiral_message.mp4",
-    actionConfig: [
-      { label: "Ir al álbum", type: "NAVIGATE_ALBUM", variant: "highlighted", icon: "next" }
-    ]
-  },
+
   "PENDING_PLACEMENT_WARNING": {
     priority: 3,
     text: [

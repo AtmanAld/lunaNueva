@@ -7,7 +7,6 @@ import { createPetSlice } from './slices/createPetSlice';
 import { createStoreSlice } from './slices/createStoreSlice';
 import { createAlbumSlice } from './slices/createAlbumSlice';
 import { createMessageSlice } from './slices/createMessageSlice';
-
 export const useGameStore = create(
   persist(
     (...a) => ({

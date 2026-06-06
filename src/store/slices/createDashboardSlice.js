@@ -267,19 +267,6 @@ export const createDashboardSlice = (set, get) => ({
       }
     }
 
-    // Si no hay slots vacíos en la página activa (página completa)
-    if (!selectedSlot) {
-      const userStars = state.userStars || 0;
-      if (userStars < 300) {
-        const diff = 300 - userStars;
-        state.updateStars(diff);
-        state.setSpiralMessage("SPIRAL_GIFT_STARS", { stars: diff });
-      } else {
-        state.setSpiralMessage("ALBUM_PAGE_COMPLETE_LOCK", { pageId: activePageId });
-      }
-      return;
-    }
-
     // Si sí hay un slot para colocar la tarjeta
     const pendingCard = {
       pageId: selectedSlot.pageId,
