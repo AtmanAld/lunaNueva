@@ -69,12 +69,18 @@ export function AlbumPage() {
   // Reacción inicial de Spiral al entrar
   useEffect(() => {
     setRewardPromptDismissed(false);
-    if (pendingPlacementCard) {
-      enqueueMessage('album_state', 'PENDING_PLACEMENT_REMINDER', { title: pendingPlacementCard.title }, 'album');
+    
+    const isFullMoonLocked = useGameStore.getState().moonPhase?.name === "Luna Llena" && !useGameStore.getState().pendingPhaseReward;
+    const { isFull } = useGameStore.getState().getLatestUnlockedPageStatus();
+
+    if (isFullMoonLocked && isFull) {
+      setScopedEphemeralMessage('album_state', 'ALBUM_FULL_MOON_REMINDER', {}, 'album');
+    } else if (pendingPlacementCard) {
+      setScopedEphemeralMessage('album_state', 'PENDING_PLACEMENT_REMINDER', { title: pendingPlacementCard.title }, 'album');
     } else if (isRitualReady) {
-      enqueueMessage('album_state', 'ALBUM_PENTACLE_COMPLETE', {}, 'album');
+      setScopedEphemeralMessage('album_state', 'ALBUM_PENTACLE_COMPLETE', {}, 'album');
     } else if (isClaimed) {
-      enqueueMessage('album_state', 'ALBUM_PAGE_CLAIMED', { pageNum: currentPage }, 'album');
+      setScopedEphemeralMessage('album_state', 'ALBUM_PAGE_CLAIMED', { pageNum: currentPage }, 'album');
     } else {
       const pageSlots = globalSlots.filter(s => s.pageId === currentPage);
       const filledCount = pageSlots.filter(s => s.state === 'filled').length;

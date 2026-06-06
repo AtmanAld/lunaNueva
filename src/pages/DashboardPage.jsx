@@ -180,6 +180,7 @@ export function DashboardPage() {
   const updateStars = useGameStore(state => state.updateStars);
   const useMoonDust = useGameStore(state => state.useMoonDust);
   const polvoLunarCount = useGameStore(state => state.albumItems?.polvo_lunar || 0);
+  const getLatestUnlockedPageStatus = useGameStore(state => state.getLatestUnlockedPageStatus);
 
   const [isAnimatingReward, setIsAnimatingReward] = useState(false);
   const [activeStarParticles, setActiveStarParticles] = useState([]);
@@ -199,13 +200,15 @@ export function DashboardPage() {
       // 1. Ejecutar la acción del store inmediatamente para que resbale a Luna Nueva y limpie DASHBOARD_FULL_MOON
       storeHandleGlobalAction(action);
 
+      const hasCard = !!useGameStore.getState().pendingPlacementCard;
+
       // 2. Bloquear la UI globalmente en el store
       useGameStore.setState({ isMoonCelebrationActive: true });
 
       // 3. Disparar celebración local
       setIsRenewingMoon(true);
       setRenewalVideoActive(true);
-      setShowRenewalCard(true);
+      setShowRenewalCard(hasCard);
       setShowRenewalMessage(false);
     } else if (action.type === 'GO_TO_ALBUM') {
       // 4. Limpiar mensaje/celebración e ir al álbum
@@ -334,11 +337,30 @@ export function DashboardPage() {
 
   useEffect(() => {
     if (isFullMoonLocked && !isPersistedCelebration) {
-      enqueueMessage('dash_full_moon', 'DASHBOARD_FULL_MOON', {}, 'dashboard');
+      const { isFull } = getLatestUnlockedPageStatus();
+      if (!isFull) {
+        enqueueMessage('dash_full_moon', 'DASHBOARD_FULL_MOON', {}, 'dashboard');
+      } else {
+        const state = useGameStore.getState();
+        const storeItems = state.storeItems || [];
+        const polvoItem = storeItems.find(i => i.id === 'polvo_lunar');
+        const polvoPrice = polvoItem ? polvoItem.price : 180;
+        
+        const polvosFaltantes = 2 - polvoLunarCount;
+        const costoTotal = polvosFaltantes > 0 ? polvosFaltantes * polvoPrice : 0;
+        const userStars = state.userStars || 0;
+        
+        if (polvoLunarCount >= 2 || userStars >= costoTotal) {
+           enqueueMessage('dash_full_moon_blocker', 'PAGE_FULL_UNLOCK_REQUIRED', {}, 'dashboard');
+        } else {
+           enqueueMessage('dash_full_moon_blocker', 'PAGE_FULL_LOAN_OFFER', {}, 'dashboard');
+        }
+      }
     } else {
       dequeueMessage('dash_full_moon');
+      dequeueMessage('dash_full_moon_blocker');
     }
-  }, [isFullMoonLocked, isPersistedCelebration, enqueueMessage, dequeueMessage]);
+  }, [isFullMoonLocked, isPersistedCelebration, polvoLunarCount, enqueueMessage, dequeueMessage, getLatestUnlockedPageStatus]);
 
   useEffect(() => {
     if (showRenewalMessage) {
@@ -465,7 +487,7 @@ export function DashboardPage() {
   };
 
   // ¿Debemos mostrar el modal? (DASHBOARD_FULL_MOON se quita para que salga con botones abajo pero sin bloquear)
-  const modalMessageIds = ["NEW_DAY_PROMPT"];
+  const modalMessageIds = ["NEW_DAY_PROMPT", "PAGE_FULL_UNLOCK_REQUIRED", "PAGE_FULL_LOAN_OFFER"];
   const isModalActive = modalMessageIds.includes(activeMessage?.id);
 
   return (

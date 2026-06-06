@@ -1,16 +1,19 @@
 
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../../store/useGameStore';
 
 export function TopBar() {
+  const location = useLocation();
+  const isDashboard = location.pathname === '/';
+  
   const userStars = useGameStore(state => state.userStars);
   const userName = useGameStore(state => state.userName);
   const userAvatar = useGameStore(state => state.userAvatar);
   const moonPhaseName = useGameStore(state => state.moonPhase?.name);
   const isMoonCelebrationActive = useGameStore(state => state.isMoonCelebrationActive);
 
-  const isLocked = isMoonCelebrationActive || moonPhaseName === "Luna Llena";
+  const isLocked = isMoonCelebrationActive || (isDashboard && moonPhaseName === "Luna Llena");
 
   return (
     <div 

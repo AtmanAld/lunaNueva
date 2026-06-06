@@ -6,10 +6,12 @@ import { useGameStore } from '../../store/useGameStore';
 export function FloatingNav() {
   const location = useLocation();
   const path = location.pathname;
+  const isDashboard = path === '/';
+  
   const moonPhaseName = useGameStore(state => state.moonPhase?.name);
   const isMoonCelebrationActive = useGameStore(state => state.isMoonCelebrationActive);
 
-  const isLocked = isMoonCelebrationActive || moonPhaseName === "Luna Llena";
+  const isLocked = isMoonCelebrationActive || (isDashboard && moonPhaseName === "Luna Llena");
 
   const links = [
     { to: '/', icon: Home, label: 'Dashboard' },

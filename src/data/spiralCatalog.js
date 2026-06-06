@@ -19,6 +19,29 @@ export const spiralCatalog = {
       { label: "Muy bien", type: "STORE_CANCEL", icon: "undo", variant: "modal_normal" }
     ]
   },
+  "NEW_DAY_PROMPT": {
+    text: "Miau... un nuevo día ha comenzado. Es hora de brillar, ¡hagámoslo!",
+    video: "/assets/videos/spiral_message.mp4",
+    actionConfig: [
+      { label: "Comenzar", type: "CLOSE", variant: "primary" }
+    ]
+  },
+  "PAGE_FULL_UNLOCK_REQUIRED": {
+    priority: 10,
+    text: "¡La luna está llena!, pero necesitamos primero abrir la siguiente página del album para recibir una nueva carta, ¿vamos?",
+    video: "/assets/videos/spiral_message.mp4",
+    actionConfig: [
+      { label: "Ir al álbum", type: "NAVIGATE_ALBUM", variant: "primary" }
+    ]
+  },
+  "PAGE_FULL_LOAN_OFFER": {
+    priority: 10,
+    text: "¡La luna está llena!, pero necesitamos abrir la siguiente página del album para recibir nueva carta. ¡Yo te presto los polvos de luna que te faltan!, ¿aceptas?",
+    video: "/assets/videos/spiral_message.mp4",
+    actionConfig: [
+      { label: "Acepto", type: "ACCEPT_DUST_LOAN", variant: "primary" }
+    ]
+  },
 
   // === PROFILE ===
   "PROFILE_EDIT_MAIN": {
@@ -637,7 +660,8 @@ export const spiralCatalog = {
     ],
     video: "assets/videos/spiral_message.mp4",
     actionConfig: [
-      { label: "Regresar", type: "ALBUM_UNLOCK_CANCEL", variant: "modal_highlighted", icon: "undo" }
+      { label: "Ir a la tienda", type: "ALBUM_NAVIGATE_STORE", variant: "modal_highlighted", icon: "store" },
+      { label: "Regresar", type: "ALBUM_UNLOCK_CANCEL", variant: "modal_normal", icon: "undo" }
     ]
   },
 
@@ -745,6 +769,20 @@ export const spiralCatalog = {
       { label: "Aceptar cambios", type: "UPDATE_PROFILE", variant: "highlighted", icon: "check" },
       { label: "Regresar", type: "CANCEL", variant: "normal", icon: "back" }
     ]
+  },
+  "ALBUM_PAGE_CLAIMED": {
+    text: [
+      "¡Miau! Ya completamos y cobramos la página {{pageNum}}. ¡Qué recuerdos!",
+      "Esta página {{pageNum}} ya es parte de la historia. Prrr..."
+    ],
+    video: "assets/videos/spiral_message.mp4",
+    actionConfig: []
+  },
+  "ALBUM_FULL_MOON_REMINDER": {
+    text: [
+      "Miau, ¡hay que abrir la siguiente página para poder celebrar la luna llena! 🌕"
+    ],
+    video: "assets/videos/spiral_message.mp4"
   },
   "ALBUM_ENTRY": {
     text: [
@@ -863,7 +901,7 @@ export const spiralCatalog = {
   "SPIRAL_GIFT_STARS": {
     priority: 3,
     text: [
-      "¡Miau! Tu página del álbum ya está 100% llena. Como recompensa, ¡Spiral te regala {{stars}} ⭐ para que alcances las 300 estrellas y puedas comprar Polvo Lunar en la tienda! 🎁✨"
+      "¡Miau! Tu página del álbum ya está 100% llena. Como recompensa, ¡Spiral te regala {{stars}} ⭐ para que alcances las 360 estrellas y puedas comprar Polvo Lunar en la tienda! 🎁✨"
     ],
     video: "assets/videos/spiral_message.mp4",
     actionConfig: [

@@ -242,7 +242,8 @@ export const createDashboardSlice = (set, get) => ({
       return;
     }
 
-    const activePageId = state.albumPage || 1;
+    // Utiliza la última página desbloqueada en lugar de la que estaba mirando la usuaria
+    const { pageId: activePageId } = get().getLatestUnlockedPageStatus();
     const activePage = state.pages.find(p => p.id === activePageId);
 
     // 1. Obtener slots de la página activa
@@ -377,6 +378,15 @@ export const createDashboardSlice = (set, get) => ({
     }
     return { ...nextStateUpdates, isNewDay: false, isReviewDay: false };
   }),
+  getLatestUnlockedPageStatus: () => {
+    const state = get();
+    const unlockedPages = state.pages.filter(p => p.state === 'unlocked');
+    const latestPage = unlockedPages[unlockedPages.length - 1];
+    const pageId = latestPage ? latestPage.id : 1;
+    const slots = state.slots.filter(s => s.pageId === pageId);
+    const isFull = slots.length > 0 && slots.every(s => s.state === 'filled');
+    return { isFull, pageId };
+  },
 
   handleGlobalAction: (action) => {
     if (action.type === 'START_NEW_DAY') {
@@ -398,8 +408,30 @@ export const createDashboardSlice = (set, get) => ({
 
     } else if (action.type === 'CLAIM_MOON_REWARD') {
       get().claimMoonReward();
-    } else if (action.type === 'NAVIGATE_ALBUM') {
+    } else if (action.type === 'NAVIGATE_ALBUM' || action.type === 'GO_TO_ALBUM') {
       set({ pendingNavigation: '/album' });
+      get().clearSpiralMessage();
+      get().clearEphemeralMessage();
+    } else if (action.type === 'ACCEPT_DUST_LOAN') {
+      const state = get();
+      const currentDust = state.albumItems?.polvo_lunar || 0;
+      const needed = 2 - currentDust;
+      if (needed > 0) {
+        const storeItems = state.storeItems || [];
+        const polvoItem = storeItems.find(i => i.id === 'polvo_lunar');
+        const polvoPrice = polvoItem ? polvoItem.price : 180;
+        
+        const cost = needed * polvoPrice; 
+        state.updateStars(-cost);
+        set({
+          albumItems: {
+            ...state.albumItems,
+            polvo_lunar: currentDust + needed
+          }
+        });
+      }
+      set({ pendingNavigation: '/album' });
+      state.dequeueMessage('dash_full_moon_blocker');
       get().clearSpiralMessage();
       get().clearEphemeralMessage();
     } else if (action.type === 'REVIEW_PREVIOUS_DAY') {
