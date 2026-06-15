@@ -26,7 +26,7 @@ export const createEngineSlice = (set, get) => ({
         if (!newCollections[collection.collectionId]) {
           hasChanges = true;
           const initialNodesState = {};
-          
+
           collection.nodes.forEach(node => {
             initialNodesState[node.nodeId] = {
               status: "active", // "active", "completed", "locked"
@@ -36,8 +36,8 @@ export const createEngineSlice = (set, get) => ({
           });
 
           // Si es flujo lineal, ponemos el primer nodo como el activo
-          const currentNodeId = collection.behavior.flow === "linear" && collection.nodes.length > 0 
-            ? collection.nodes[0].nodeId 
+          const currentNodeId = collection.behavior.flow === "linear" && collection.nodes.length > 0
+            ? collection.nodes[0].nodeId
             : null;
 
           newCollections[collection.collectionId] = {
@@ -48,12 +48,10 @@ export const createEngineSlice = (set, get) => ({
       });
 
       if (hasChanges) {
-        return {
-          engineState: {
-            ...state.engineState,
-            collections: newCollections
-          }
-        };
+        console.log(`✅ [Mission Engine] Conectado y sincronizado. Colecciones inicializadas: ${Object.keys(newCollections).length}.`);
+        return { engineState: { collections: newCollections } };
+      } else {
+        console.log(`✅ [Mission Engine] Conectado. Colecciones cargadas desde memoria: ${Object.keys(newCollections).length}.`);
       }
       return state;
     });
@@ -119,16 +117,13 @@ export const createEngineSlice = (set, get) => ({
     const catalogNode = missionCatalog[nodeId];
     if (!catalogNode) return;
 
+    const outcomes = catalogNode.outcomes?.onComplete;
     const cooldownDays = catalogNode.execution.recurrence?.cooldownDays || 0;
-    
-    // Aquí es donde en el futuro haremos el broadcast de los 'outcomes' (estrellas, polvos)
-    // para que el resto de la app los atrape y aplique a sus respectivas variables.
-    // const outcomes = catalogNode.outcomes?.onComplete;
 
     // Lógica de avance lineal
     const collectionDef = collectionIndex.find(c => c.collectionId === collectionId);
     let newCurrentNodeId = collectionData.currentNodeId;
-    
+
     if (collectionDef && collectionDef.behavior.flow === "linear" && collectionData.currentNodeId === nodeId) {
       // Busca a dónde debe apuntar ahora
       const nodeDef = collectionDef.nodes.find(n => n.nodeId === nodeId);
@@ -160,6 +155,11 @@ export const createEngineSlice = (set, get) => ({
         }
       }
     }));
+
+    // Finalmente enviamos el botín por el puente al Dashboard (fuera del set)
+    if (outcomes) {
+      get().processEngineOutcomes?.(nodeId, outcomes);
+    }
   },
 
   /**
@@ -179,7 +179,7 @@ export const createEngineSlice = (set, get) => ({
           if (nodeState.status === "completed" && nodeState.cooldownRemaining > 0) {
             hasChanges = true;
             const newCooldown = nodeState.cooldownRemaining - 1;
-            
+
             newNodesState[nodeId] = {
               ...nodeState,
               cooldownRemaining: newCooldown,
@@ -191,7 +191,7 @@ export const createEngineSlice = (set, get) => ({
             newNodesState[nodeId] = nodeState;
           }
         }
-        
+
         newCollections[collectionId] = {
           ...collectionData,
           nodesState: newNodesState
@@ -211,6 +211,9 @@ export const createEngineSlice = (set, get) => ({
   }
 });
 
+// Default estático para evitar re-renders y bucles infinitos en Zustand/React 18
+const DEFAULT_NODE_STATE = { status: "active", progress: 0, cooldownRemaining: 0 };
+
 // Selector puro para obtener la data cruzada estática + dinámica
 export const selectMissionNode = (state, nodeId) => {
   const staticData = missionCatalog[nodeId];
@@ -218,7 +221,7 @@ export const selectMissionNode = (state, nodeId) => {
 
   let dynamicNode = null;
   let parentCollectionId = null;
-  
+
   if (state.engineState?.collections) {
     for (const [colId, colData] of Object.entries(state.engineState.collections)) {
       if (colData.nodesState && colData.nodesState[nodeId]) {
@@ -233,13 +236,13 @@ export const selectMissionNode = (state, nodeId) => {
   if (staticData.availability?.requiresCost) {
     const required = staticData.availability.requiresCost[0];
     if (required.item === "polvo_lunar") {
-        const currentDust = state.albumItems?.polvo_lunar || 0;
-        if (currentDust < required.amount) isAvailable = false;
+      const currentDust = state.albumItems?.polvo_lunar || 0;
+      if (currentDust < required.amount) isAvailable = false;
     }
   }
 
   return {
-    node: dynamicNode || { status: "active", progress: 0, cooldownRemaining: 0 },
+    node: dynamicNode || DEFAULT_NODE_STATE,
     staticData,
     parentCollectionId,
     isAvailable

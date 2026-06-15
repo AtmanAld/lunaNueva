@@ -316,6 +316,88 @@ export const createDashboardSlice = (set, get) => ({
       }
     });
   },
+  processEngineOutcomes: (nodeId, outcomes) => {
+    const state = get();
+    if (!outcomes) return;
+
+    let pointsDelta = 0;
+    let starsToAdd = 0;
+
+    if (outcomes.points) {
+      const moonPoints = outcomes.points.find(p => p.type === 'moon_points');
+      if (moonPoints) pointsDelta = moonPoints.amount;
+    }
+
+    if (outcomes.currencies) {
+      const stars = outcomes.currencies.find(c => c.type === 'stars');
+      if (stars) starsToAdd = stars.amount;
+    }
+
+    const currentPoints = Number(state.moonPhase?.progressPoints) || 0;
+    const newPoints = Math.max(0, Math.min(state.moonPhase.maxPoints || 100, currentPoints + pointsDelta));
+
+    const getPhaseName = (pts, phaseState) => {
+      if (pts >= 100) return "Luna Llena";
+      if (pts >= 74 || phaseState.givenGibosa) return "Gibosa Creciente";
+      if (pts >= 49 || phaseState.givenCuarto) return "Cuarto Creciente";
+      if (pts >= 25 || phaseState.givenCreciente) return "Luna Creciente";
+      return "Luna Nueva";
+    };
+
+    const newPhaseName = getPhaseName(newPoints, state.moonPhase);
+
+    let newMoonPhase = {
+      ...state.moonPhase,
+      progressPoints: newPoints,
+      name: newPhaseName
+    };
+
+    let starsToGive = 0;
+    let highestPhase = null;
+
+    if (newPoints >= 25 && !newMoonPhase.givenCreciente) {
+      newMoonPhase.givenCreciente = true;
+      starsToGive += 10;
+      highestPhase = 'LUNA_CRECIENTE';
+    }
+    if (newPoints >= 49 && !newMoonPhase.givenCuarto) {
+      newMoonPhase.givenCuarto = true;
+      starsToGive += 20;
+      highestPhase = 'LUNA_CUARTO_CRECIENTE';
+    }
+    if (newPoints >= 74 && !newMoonPhase.givenGibosa) {
+      newMoonPhase.givenGibosa = true;
+      starsToGive += 30;
+      highestPhase = 'LUNA_GIBOSA_CRECIENTE';
+    }
+    if (newPoints >= 100 && !newMoonPhase.givenFullMoonReward) {
+      newMoonPhase.givenFullMoonReward = true;
+      starsToGive += 60;
+      highestPhase = 'LUNA_LLENA';
+    }
+
+    let pendingPhaseReward = state.pendingPhaseReward;
+    if (starsToGive > 0) {
+      pendingPhaseReward = { phase: highestPhase, stars: starsToGive };
+    }
+
+    set({
+      moonPhase: newMoonPhase,
+      pendingPhaseReward
+    });
+
+    if (starsToAdd > 0) get().updateStars(starsToAdd);
+    // Asumimos 1 completion = 1 task por ahora
+    get().updateTasks(1);
+
+    if (newPoints >= (state.moonPhase.maxPoints || 100) && currentPoints < (state.moonPhase.maxPoints || 100)) {
+      get().setSpiralMessage("DASHBOARD_FULL_MOON", { stars: 60 });
+    } else if (!pendingPhaseReward) {
+      get().setEphemeralMessage("ACTIVITY_COMPLETE_SINGLE", { stars: starsToAdd });
+    }
+
+    console.log(`🌉 [Bridge] Outcomes procesados para ${nodeId}: +${starsToAdd} ⭐, +${pointsDelta} 🌙. Fase lunar actual: ${newPhaseName} (${newPoints}%)`);
+  },
   updateActivity: (id, data) => set((state) => ({
     activities: state.activities.map(a => a.activityID === id ? { ...a, ...data } : a)
   })),
@@ -336,8 +418,12 @@ export const createDashboardSlice = (set, get) => ({
   isReviewDay: false,
   isNewDay: false,
 
-  verifyGameState: () => set((state) => {
-    const today = getLocalDateString();
+  verifyGameState: () => {
+    // 0. Inicializar Mission Engine si es la primera vez
+    get().initEngine?.();
+
+    set((state) => {
+      const today = getLocalDateString();
 
     // 1. Sincronizar nuevas actividades del catálogo que no estén en el estado
     const existingIds = state.activities.map(a => a.activityID);
@@ -364,7 +450,8 @@ export const createDashboardSlice = (set, get) => ({
       return { ...nextStateUpdates, isNewDay: true };
     }
     return { ...nextStateUpdates, isNewDay: false, isReviewDay: false };
-  }),
+    });
+  },
   getLatestUnlockedPageStatus: () => {
     const state = get();
     const unlockedPages = state.pages.filter(p => p.state === 'unlocked');

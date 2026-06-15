@@ -30,7 +30,7 @@ export function ProfilePage() {
   const userName = useGameStore(state => state.userName);
   const petName = useGameStore(state => state.petName);
   const userAvatar = useGameStore(state => state.userAvatar);
-  
+
   const [tempUserName, setTempUserName] = useState(userName);
   const [tempPetName, setTempPetName] = useState(petName);
 
@@ -107,12 +107,12 @@ export function ProfilePage() {
           <div className="flex flex-col w-full gap-5 px-8 max-w-[340px] mx-auto mt-6 pb-4">
             {/* CONTENT: UPLOAD BOX */}
             <div className="w-full flex justify-center mb-2 relative">
-              <input 
-                type="file" 
-                accept="image/*" 
-                onChange={handleFileUpload} 
-                style={{ display: 'none' }} 
-                id="avatar-upload" 
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                style={{ display: 'none' }}
+                id="avatar-upload"
                 disabled={isUploading}
               />
               <label htmlFor="avatar-upload" className="w-full">
@@ -227,7 +227,7 @@ export function ProfilePage() {
           {/* Textos: Nombre y Nivel */}
           <div className="text-center relative z-20 flex flex-col items-center">
             <h1 className="text-5xl font-display italic text-primary-fixed-dim drop-shadow-[0_0_8px_rgba(220,184,255,0.2)] mb-3">{userName}</h1>
-            <p 
+            <p
               className="text-[11px] font-medium text-on-surface-variant uppercase tracking-[0.25em] cursor-default"
               onClick={handleSecretTap}
             >
@@ -248,11 +248,11 @@ export function ProfilePage() {
             </div>
           ))}
         </div>
-        
+
         {/* BOTÓN DE CERRAR SESIÓN SIEMPRE VISIBLE */}
         <div className="w-full flex flex-col items-center gap-4 max-w-[340px] mt-4">
-          <Button 
-            variant="modal_normal" 
+          <Button
+            variant="modal_normal"
             onClick={async () => {
               await supabase.auth.signOut();
             }}
@@ -269,7 +269,25 @@ export function ProfilePage() {
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/60">Zona de Pruebas (Dev)</p>
               <button onClick={() => setShowDev(false)} className="text-[10px] font-bold uppercase text-on-surface-variant/50 hover:text-on-surface-variant">Cerrar</button>
             </div>
-            
+
+            {/* --- PRUEBA DEL MISSION ENGINE BRIDGE --- */}
+            <Button
+              variant="modal_normal"
+              onClick={() => {
+                // Forzamos el reset a active para que siempre deje clickear en la prueba
+                const state = useGameStore.getState();
+                const nodeState = state.engineState.collections["col_set_2"]?.nodesState["m_lavar_ropa"];
+                if (nodeState && nodeState.status === "completed") {
+                  nodeState.status = "active";
+                  nodeState.cooldownRemaining = 0;
+                }
+                state.completeMission('m_lavar_ropa', 'col_set_2');
+              }}
+              className="w-full bg-primary/20 border border-primary/50 py-3 rounded-2xl text-[11px] text-primary-fixed uppercase tracking-widest font-bold"
+            >
+              Test Bridge (+1 Luna)
+            </Button>
+
             {/* Indicadores de Necesidades (Movidos de SpiralPetPage) */}
             <div className="flex justify-between w-full px-6 py-4 bg-surface-container/30 rounded-[1.5rem] border border-white/5 mb-2">
               {petNeeds.map(need => (
@@ -280,21 +298,21 @@ export function ProfilePage() {
               ))}
             </div>
 
-            <Button 
-              variant="none" 
+            <Button
+              variant="none"
               onClick={() => useGameStore.setState({ lastResetDate: '2000-01-01' })}
               className="w-full bg-surface-container-highest/30 border border-white/5 py-4 rounded-[1.5rem] text-[12px] text-on-surface-variant uppercase tracking-widest font-bold hover:bg-surface-container-highest/60 transition-all"
             >
               Simular Día Pasado
             </Button>
 
-            <Button 
-              variant="none" 
+            <Button
+              variant="none"
               onClick={() => {
                 const currentPage = useGameStore.getState().albumPage || 1;
                 useGameStore.getState().setRewardState(currentPage, 'default');
                 useGameStore.getState().resetRitualState();
-                
+
                 // Vaciar slots de la página actual y dejar pendingPlacementCard en null (cero tarjetas en mano)
                 const currentSlots = useGameStore.getState().slots || [];
                 const updatedSlots = currentSlots.map(s => {
@@ -303,12 +321,12 @@ export function ProfilePage() {
                   }
                   return s;
                 });
-                
+
                 useGameStore.setState({
                   slots: updatedSlots,
                   pendingPlacementCard: null
                 });
-                
+
                 alert(`¡Ritual de la Página ${currentPage} reseteado manualmente con slots vacíos y cero tarjetas en mano!`);
               }}
               className="w-full bg-surface-container-highest/30 border border-white/5 py-4 rounded-[1.5rem] text-[12px] text-on-surface-variant uppercase tracking-widest font-bold hover:bg-surface-container-highest/60 transition-all"
@@ -318,29 +336,29 @@ export function ProfilePage() {
 
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/40 mt-4">Spiral Degradación</p>
             <div className="grid grid-cols-2 gap-3 w-full">
-              <Button 
-                variant="none" 
+              <Button
+                variant="none"
                 onClick={() => useGameStore.getState().degradeNeedTest('water', 4)}
                 className="bg-surface-container-highest/30 border border-white/5 py-3 rounded-[1rem] text-[11px] text-on-surface-variant uppercase tracking-widest font-bold hover:bg-surface-container-highest/60 transition-all"
               >
                 Agua (-4 pts)
               </Button>
-              <Button 
-                variant="none" 
+              <Button
+                variant="none"
                 onClick={() => useGameStore.getState().degradeNeedTest('food', 8)}
                 className="bg-surface-container-highest/30 border border-white/5 py-3 rounded-[1rem] text-[11px] text-on-surface-variant uppercase tracking-widest font-bold hover:bg-surface-container-highest/60 transition-all"
               >
                 Comida (-8 pts)
               </Button>
-              <Button 
-                variant="none" 
+              <Button
+                variant="none"
                 onClick={() => useGameStore.getState().degradeNeedTest('play', 10)}
                 className="bg-surface-container-highest/30 border border-white/5 py-3 rounded-[1rem] text-[11px] text-on-surface-variant uppercase tracking-widest font-bold hover:bg-surface-container-highest/60 transition-all"
               >
                 Juego (-10 pts)
               </Button>
-              <Button 
-                variant="none" 
+              <Button
+                variant="none"
                 onClick={() => useGameStore.getState().degradeNeedTest('clean', 24)}
                 className="bg-surface-container-highest/30 border border-white/5 py-3 rounded-[1rem] text-[11px] text-on-surface-variant uppercase tracking-widest font-bold hover:bg-surface-container-highest/60 transition-all"
               >
@@ -349,8 +367,8 @@ export function ProfilePage() {
             </div>
 
             <div className="mt-6 flex flex-col gap-2 w-full">
-              <Button 
-                variant="none" 
+              <Button
+                variant="none"
                 onClick={() => {
                   useGameStore.setState((state) => ({
                     needs: { water: 100, food: 100, clean: 100, play: 100 },
@@ -369,12 +387,12 @@ export function ProfilePage() {
               <p className="text-[10px] text-primary/60 uppercase tracking-[0.2em] font-bold text-center mb-2">Inyectar Cartas (Dev Only)</p>
               <div className="flex flex-wrap gap-2 justify-center">
                 {[1, 2, 3, 4, 5].map((num) => (
-                  <Button 
+                  <Button
                     key={num}
-                    variant="none" 
+                    variant="none"
                     onClick={() => {
                       const slot = useGameStore.getState().slots.find(s => s.pageId === 1 && s.slotNum === num);
-                      if(slot) {
+                      if (slot) {
                         useGameStore.setState({ pendingPlacementCard: slot });
                         alert(`¡Carta ${num} (${slot.title}) en mano! Ve al álbum para colocarla.`);
                       }
@@ -385,8 +403,8 @@ export function ProfilePage() {
                   </Button>
                 ))}
               </div>
-              <Button 
-                variant="none" 
+              <Button
+                variant="none"
                 onClick={() => {
                   const currentPage = useGameStore.getState().albumPage || 1;
                   const slots = useGameStore.getState().slots;
@@ -396,15 +414,15 @@ export function ProfilePage() {
                   // Resetear el estado de cobro para que isRitualReady vuelva a ser true
                   useGameStore.getState().setRewardState(currentPage, 'default');
                   useGameStore.getState().resetRitualState();
-                  
+
                   alert(`¡Todas las cartas de la Página ${currentPage} están llenas! Ve al álbum para ver el ritual.`);
                 }}
                 className="mt-2 bg-secondary/10 border border-secondary/30 py-3 rounded-[1rem] text-[11px] text-secondary uppercase tracking-widest font-bold hover:bg-secondary/20 transition-all w-full"
               >
                 Llenar Álbum (Forzar isRitualReady)
               </Button>
-              <Button 
-                variant="none" 
+              <Button
+                variant="none"
                 onClick={() => {
                   useGameStore.setState({ pendingPlacementCard: null });
                   alert("¡Cartas quitadas de la mano!");

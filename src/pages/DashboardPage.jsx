@@ -309,7 +309,7 @@ export function DashboardPage() {
 
   // --- LÓGICA DEL ESTADO DERIVADO (Fondo del Dashboard) ---
   const isReviewDay = useGameStore(state => state.isReviewDay);
-  
+
   // Calcular en tiempo real (instantáneo) si es un nuevo día cronológico para evitar desfasajes en el primer render (montaje)
   const today = getLocalDateString();
   const isNewDay = useMemo(() => {
@@ -346,15 +346,15 @@ export function DashboardPage() {
         const storeItems = state.storeItems || [];
         const polvoItem = storeItems.find(i => i.id === 'polvo_lunar');
         const polvoPrice = polvoItem ? polvoItem.price : 180;
-        
+
         const polvosFaltantes = 2 - polvoLunarCount;
         const costoTotal = polvosFaltantes > 0 ? polvosFaltantes * polvoPrice : 0;
         const userStars = state.userStars || 0;
-        
+
         if (polvoLunarCount >= 2 || userStars >= costoTotal) {
-           enqueueMessage('dash_full_moon_blocker', 'PAGE_FULL_UNLOCK_REQUIRED', {}, 'dashboard');
+          enqueueMessage('dash_full_moon_blocker', 'PAGE_FULL_UNLOCK_REQUIRED', {}, 'dashboard');
         } else {
-           enqueueMessage('dash_full_moon_blocker', 'PAGE_FULL_LOAN_OFFER', {}, 'dashboard');
+          enqueueMessage('dash_full_moon_blocker', 'PAGE_FULL_LOAN_OFFER', {}, 'dashboard');
         }
       }
     } else {
@@ -811,7 +811,7 @@ export function DashboardPage() {
                 <div className="relative z-10 flex items-center gap-4 flex-1">
                   {/* Círculo que semeja Luna Llena (sin palomita, lila/blanco brillante) */}
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-fixed-dim via-primary-fixed to-[#ffffff] shadow-[0_0_12px_rgba(220,184,255,0.6)] border-transparent shrink-0" />
-                  
+
                   {/* Nombre de la actividad en gris sin tachar */}
                   <span className="text-[0.95rem] text-on-surface-variant font-medium">
                     {act.title}

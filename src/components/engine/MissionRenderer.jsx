@@ -6,10 +6,10 @@ import { HoldToCompleteButton } from '../ui/HoldToCompleteButton';
 // El componente interno para la tarjeta de Dashboard
 function DashboardActivityCard({ nodeInfo }) {
   const { node, staticData } = nodeInfo;
-  
+
   const isCompleted = node.status === 'completed';
   const isSpecial = staticData.id === 'm_consumir_polvo_lunar';
-  
+
   const handleComplete = () => {
     // EN LA FASE 3: Aquí llamaremos a `engineSlice.completeMission()`
     console.log("Completado (Pendiente de enrutar al motor):", staticData.id);
@@ -17,15 +17,15 @@ function DashboardActivityCard({ nodeInfo }) {
 
   // Derivamos el texto de duración o valor
   const displayCount = node.progress > 0 ? node.progress : staticData.execution.targetValue;
-  
+
   const getPluralizedText = (count, unit) => {
     if (count === 1) return unit;
     if (unit && unit.endsWith('z')) return unit.slice(0, -1) + 'ces';
     return unit ? unit + 's' : '';
   };
-  
+
   const durationText = `${displayCount} ${getPluralizedText(displayCount, staticData.meta.valueUnit || 'vez')}`;
-  
+
   // Cálculo de estrellas desde outcomes
   const starsAmount = staticData.outcomes?.onComplete?.currencies?.find(c => c.type === 'stars')?.amount || 0;
 
@@ -35,8 +35,8 @@ function DashboardActivityCard({ nodeInfo }) {
       className={`group transition-colors duration-500 relative border overflow-hidden !bg-surface-container/20 backdrop-blur-lg ${isCompleted ? 'border-primary/20 opacity-80' : 'border-transparent hover:!bg-surface-container/40'}`}
     >
       {/* El HoldToCompleteButton envuelve internamente el contenido, permitiendo que la barra de llenado se dibuje SOBRE el GlassCard pero DEBAJO del texto */}
-      <HoldToCompleteButton 
-        isCompleted={isCompleted} 
+      <HoldToCompleteButton
+        isCompleted={isCompleted}
         onComplete={handleComplete}
         durationMs={6000} // 6 segundos de llenado lento
       >
@@ -94,7 +94,7 @@ export function MissionRenderer({ nodeId, variant = "dashboard_activity" }) {
   switch (variant) {
     case "dashboard_activity":
       return <DashboardActivityCard nodeInfo={nodeInfo} />;
-    
+
     default:
       console.warn(`Variante visual '${variant}' no implementada en MissionRenderer.`);
       return null;

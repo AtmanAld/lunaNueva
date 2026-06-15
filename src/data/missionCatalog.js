@@ -121,7 +121,7 @@ export const missionCatalog = {
       recurrence: { isRepeatable: true, resetType: "calendar", cooldownDays: 6, maxCompletions: 1 }
     },
     outcomes: {
-      onComplete: { currencies: [{ type: "stars", amount: 40 }], points: [{ type: "moon_points", amount: 6 }] }
+      onComplete: { currencies: [{ type: "stars", amount: 5 }], points: [{ type: "moon_points", amount: 1 }] }
     },
     content: { hasMultimedia: false }
   },

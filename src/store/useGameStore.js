@@ -7,6 +7,7 @@ import { createPetSlice } from './slices/createPetSlice';
 import { createStoreSlice } from './slices/createStoreSlice';
 import { createAlbumSlice } from './slices/createAlbumSlice';
 import { createMessageSlice } from './slices/createMessageSlice';
+import { createEngineSlice } from './slices/createEngineSlice';
 export const useGameStore = create(
   persist(
     (...a) => ({
@@ -15,7 +16,8 @@ export const useGameStore = create(
       ...createPetSlice(...a),
       ...createStoreSlice(...a),
       ...createAlbumSlice(...a),
-      ...createMessageSlice(...a)
+      ...createMessageSlice(...a),
+      ...createEngineSlice(...a)
     }),
     {
       name: 'luna-nueva-storage',
@@ -463,9 +465,87 @@ export const useGameStore = create(
           };
         }
 
+        if (version < 44) {
+          // Migración a versión 44: Actualizar título, subtitulo y slots de la página 2
+          const page2SlotsData = [
+            { id: 6, pageId: 2, slotNum: 1, title: 'Luna Nueva', image: '/Album Mágico/2/lunaNueva.jpg', bgSvg: '/Album Mágico/2/lunaNueva.svg', video: '/Album Mágico/2/lunaNueva.mp4', rarity: 'Especial', description: 'Símbolo del vacío fértil, la siembra de semillas místicas y la preparación de la matriz para la nueva creación.' },
+            { id: 7, pageId: 2, slotNum: 2, title: 'Diosa Espiral', image: '/Album Mágico/2/diosaEspiral.jpg', bgSvg: '/Album Mágico/2/diosaEspiral.svg', video: '/Album Mágico/2/diosaEspiral.mp4', rarity: 'Común', description: 'Silueta femenina con una espiral en el vientre. Representa la fuerza generadora y la abundancia en constante crecimiento.' },
+            { id: 8, pageId: 2, slotNum: 3, title: 'El Loto', image: '/Album Mágico/2/elLoto.jpg', bgSvg: '/Album Mágico/2/elLoto.svg', video: '/Album Mágico/2/elLoto.mp4', rarity: 'Común', description: 'Representa el útero cósmico, la pureza divina femenina y el florecimiento del espíritu.' },
+            { id: 9, pageId: 2, slotNum: 4, title: 'El Pentagrama', image: '/Album Mágico/2/elPentagrama.jpg', bgSvg: '/Album Mágico/2/elPentagrama.svg', video: '/Album Mágico/2/elPentagrama.mp4', rarity: 'Común', description: 'Estrella de cinco puntas entrelazada que apunta hacia arriba. Representa los cinco elementos: Tierra, Aire, Fuego, Agua y el Espíritu.' },
+            { id: 10, pageId: 2, slotNum: 5, title: 'La Temperanza', image: '/Album Mágico/2/laTemperanza.jpg', bgSvg: '/Album Mágico/2/laTemperanza.svg', video: '/Album Mágico/2/laTemperanza.mp4', rarity: 'Común', description: 'La caricia curativa, el flujo de energías sutiles, el tantra y la mezcla fluida de auras y esencias.' }
+          ];
+
+          state = {
+            ...state,
+            pages: (state.pages || []).map(p => {
+              if (p.id === 2) {
+                return {
+                  ...p,
+                  title: 'Espiral de Loto',
+                  subtitle: 'Donde el espíritu florece y la energía sana.'
+                };
+              }
+              return p;
+            }),
+            slots: (state.slots || []).map(s => {
+              if (s.pageId === 2) {
+                const newData = page2SlotsData.find(d => d.slotNum === s.slotNum);
+                return newData ? { ...s, ...newData } : s;
+              }
+              return s;
+            }),
+            pendingPlacementCard: state.pendingPlacementCard && state.pendingPlacementCard.pageId === 2
+              ? (() => {
+                  const p = state.pendingPlacementCard;
+                  const newData = page2SlotsData.find(d => d.slotNum === p.slotNum);
+                  return newData ? { ...p, ...newData } : p;
+                })()
+              : state.pendingPlacementCard
+          };
+        }
+
+        if (version < 45) {
+          // Migración a versión 45: Actualizar título, subtitulo y slots de la página 3
+          const page3SlotsData = [
+            { id: 11, pageId: 3, slotNum: 1, title: 'Luna Menguante', image: '/Album Mágico/3/lunaMenguante.jpg', bgSvg: '/Album Mágico/3/lunaMenguante.svg', video: '/Album Mágico/3/lunaMenguante.mp4', rarity: 'Especial', description: 'Símbolo de la anciana o la bruja sabia, la limpieza, el dejar ir y la sabiduría acumulada.' },
+            { id: 12, pageId: 3, slotNum: 2, title: 'Runa Perthro', image: '/Album Mágico/3/runaPetro.jpg', bgSvg: '/Album Mágico/3/runaPetro.svg', video: '/Album Mágico/3/runaPetro.mp4', rarity: 'Común', description: 'Representa la copa del destino y el misterio del vientre; el lugar oscuro y seguro donde se gesta la magia femenina.' },
+            { id: 13, pageId: 3, slotNum: 3, title: 'Ying Yang', image: '/Album Mágico/3/yingYang.jpg', bgSvg: '/Album Mágico/3/yingYang.svg', video: '/Album Mágico/3/yingYang.mp4', rarity: 'Común', description: 'Símbolo taoísta que denota el equilibrio perfecto entre la luz y la oscuridad, lo masculino y lo femenino.' },
+            { id: 14, pageId: 3, slotNum: 4, title: 'Venus', image: '/Album Mágico/3/simboloVenus.jpg', bgSvg: '/Album Mágico/3/simboloVenus.svg', video: '/Album Mágico/3/simboloVenus.mp4', rarity: 'Común', description: 'Representa lo femenino, la atracción, el lujo, el amor, la belleza y la abundancia terrenal.' },
+            { id: 15, pageId: 3, slotNum: 5, title: 'Tarot de Marsella: Le Chariot', image: '/Album Mágico/3/leChariot.jpg', bgSvg: '/Album Mágico/3/leChariot.svg', video: '/Album Mágico/3/leChariot.mp4', rarity: 'Común', description: 'La conquista del placer, el avance apasionado y el dominio instintivo sobre la propia sexualidad.' }
+          ];
+
+          state = {
+            ...state,
+            pages: (state.pages || []).map(p => {
+              if (p.id === 3) {
+                return {
+                  ...p,
+                  title: 'Venus oculta',
+                  subtitle: 'Equilibrio, belleza y dominio instintivo.'
+                };
+              }
+              return p;
+            }),
+            slots: (state.slots || []).map(s => {
+              if (s.pageId === 3) {
+                const newData = page3SlotsData.find(d => d.slotNum === s.slotNum);
+                return newData ? { ...s, ...newData } : s;
+              }
+              return s;
+            }),
+            pendingPlacementCard: state.pendingPlacementCard && state.pendingPlacementCard.pageId === 3
+              ? (() => {
+                  const p = state.pendingPlacementCard;
+                  const newData = page3SlotsData.find(d => d.slotNum === p.slotNum);
+                  return newData ? { ...p, ...newData } : p;
+                })()
+              : state.pendingPlacementCard
+          };
+        }
+
         return state;
       },
-      version: 43,
+      version: 45,
     }
   )
 );

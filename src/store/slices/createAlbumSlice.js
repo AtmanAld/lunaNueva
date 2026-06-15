@@ -94,32 +94,28 @@ export const createAlbumSlice = (set, get) => ({
       state: 'unlocked', 
       rewardState: 'default',
       title: 'Le Saut de la Lune',
-      subtitle: 'Donde el destino teje y el deseo danza.',
-      headerBg: '/Album Mágico/1/headerBG.jpg'
+      subtitle: 'Donde el destino teje y el deseo danza.'
     },
     { 
       id: 2, 
       state: 'locked', 
       rewardState: 'default',
-      title: 'Gatos y Misticismo',
-      subtitle: 'Colección Equinoccio 2024',
-      headerBg: '/Album Mágico/2/headerBG.jpg'
+      title: 'Espiral de Loto',
+      subtitle: 'Donde el espíritu florece y la energía sana.'
     },
     { 
       id: 3, 
       state: 'locked', 
       rewardState: 'default',
-      title: 'El Sello del Pentáculo',
-      subtitle: 'Colección Luna Llena 2025',
-      headerBg: '/Album Mágico/3/headerBG.jpg'
+      title: 'Venus oculta',
+      subtitle: 'Equilibrio, belleza y dominio instintivo.'
     },
     { 
       id: 4, 
       state: 'locked', 
       rewardState: 'default',
       title: 'Nebulosas de Ensueño',
-      subtitle: 'Colección Especial 2025',
-      headerBg: '/Album Mágico/4/headerBG.jpg'
+      subtitle: 'Colección Especial 2025'
     }
   ],
   slots: [
@@ -137,12 +133,12 @@ export const createAlbumSlice = (set, get) => ({
     { id: 9, pageId: 2, slotNum: 4, state: 'empty', title: 'El Pentagrama', image: '/Album Mágico/2/elPentagrama.jpg', bgSvg: '/Album Mágico/2/elPentagrama.svg', video: '/Album Mágico/2/elPentagrama.mp4', rarity: 'Común', description: 'Estrella de cinco puntas entrelazada que apunta hacia arriba. Representa los cinco elementos: Tierra, Aire, Fuego, Agua y el Espíritu.' },
     { id: 10, pageId: 2, slotNum: 5, state: 'empty', title: 'La Temperanza', image: '/Album Mágico/2/laTemperanza.jpg', bgSvg: '/Album Mágico/2/laTemperanza.svg', video: '/Album Mágico/2/laTemperanza.mp4', rarity: 'Común', description: 'La caricia curativa, el flujo de energías sutiles, el tantra y la mezcla fluida de auras y esencias.' },
 
-    // Página 3 (El Sello del Pentáculo)
-    { id: 11, pageId: 3, slotNum: 1, state: 'empty', title: 'Gran Ritual', image: '/Album Mágico/1/crecienteLunar.jpg', bgSvg: '/Album Mágico/1/crecienteLunar.svg', rarity: 'Especial', description: '' },
-    { id: 12, pageId: 3, slotNum: 2, state: 'empty', title: 'Cristal Amatista', image: '/Album Mágico/1/escobaDeBruja.jpg', bgSvg: '/Album Mágico/1/escobaDeBruja.svg', rarity: 'Común', description: '' },
-    { id: 13, pageId: 3, slotNum: 3, state: 'empty', title: 'Vela de Cera', image: '/Album Mágico/1/elGato.jpg', bgSvg: '/Album Mágico/1/elGato.svg', rarity: 'Común', description: '' },
-    { id: 14, pageId: 3, slotNum: 4, state: 'empty', title: 'Incienso Sagrado', image: '/Album Mágico/1/laArana.jpg', bgSvg: '/Album Mágico/1/laArana.svg', rarity: 'Común', description: '' },
-    { id: 15, pageId: 3, slotNum: 5, state: 'empty', title: 'Runas Nórdicas', image: '/Album Mágico/1/leMat.jpg', bgSvg: '/Album Mágico/1/leMat.svg', rarity: 'Común', description: '' },
+    // Página 3 (Venus oculta)
+    { id: 11, pageId: 3, slotNum: 1, state: 'empty', title: 'Luna Menguante', image: '/Album Mágico/3/lunaMenguante.jpg', bgSvg: '/Album Mágico/3/lunaMenguante.svg', video: '/Album Mágico/3/lunaMenguante.mp4', rarity: 'Especial', description: 'Símbolo de la anciana o la bruja sabia, la limpieza, el dejar ir y la sabiduría acumulada.' },
+    { id: 12, pageId: 3, slotNum: 2, state: 'empty', title: 'Runa Perthro', image: '/Album Mágico/3/runaPetro.jpg', bgSvg: '/Album Mágico/3/runaPetro.svg', video: '/Album Mágico/3/runaPetro.mp4', rarity: 'Común', description: 'Representa la copa del destino y el misterio del vientre; el lugar oscuro y seguro donde se gesta la magia femenina.' },
+    { id: 13, pageId: 3, slotNum: 3, state: 'empty', title: 'Ying Yang', image: '/Album Mágico/3/yingYang.jpg', bgSvg: '/Album Mágico/3/yingYang.svg', video: '/Album Mágico/3/yingYang.mp4', rarity: 'Común', description: 'Símbolo taoísta que denota el equilibrio perfecto entre la luz y la oscuridad, lo masculino y lo femenino.' },
+    { id: 14, pageId: 3, slotNum: 4, state: 'empty', title: 'Venus', image: '/Album Mágico/3/simboloVenus.jpg', bgSvg: '/Album Mágico/3/simboloVenus.svg', video: '/Album Mágico/3/simboloVenus.mp4', rarity: 'Común', description: 'Representa lo femenino, la atracción, el lujo, el amor, la belleza y la abundancia terrenal.' },
+    { id: 15, pageId: 3, slotNum: 5, state: 'empty', title: 'Tarot de Marsella: Le Chariot', image: '/Album Mágico/3/leChariot.jpg', bgSvg: '/Album Mágico/3/leChariot.svg', video: '/Album Mágico/3/leChariot.mp4', rarity: 'Común', description: 'La conquista del placer, el avance apasionado y el dominio instintivo sobre la propia sexualidad.' },
 
     // Página 4 (Nebulosas de Ensueño)
     { id: 16, pageId: 4, slotNum: 1, state: 'empty', title: 'Nebulosa Madre', image: '/Album Mágico/1/crecienteLunar.jpg', bgSvg: '/Album Mágico/1/crecienteLunar.svg', rarity: 'Especial', description: '' },
