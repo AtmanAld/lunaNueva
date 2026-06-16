@@ -543,9 +543,48 @@ export const useGameStore = create(
           };
         }
 
+        if (version < 46) {
+          // Migración a versión 46: Rescate de la página 2 para usuarios que se quedaron atorados en v44
+          const page2SlotsData = [
+            { id: 6, pageId: 2, slotNum: 1, title: 'Luna Nueva', image: '/Album Mágico/2/lunaNueva.jpg', bgSvg: '/Album Mágico/2/lunaNueva.svg', video: '/Album Mágico/2/lunaNueva.mp4', rarity: 'Especial', description: 'Símbolo del vacío fértil, la siembra de semillas místicas y la preparación de la matriz para la nueva creación.' },
+            { id: 7, pageId: 2, slotNum: 2, title: 'Diosa Espiral', image: '/Album Mágico/2/diosaEspiral.jpg', bgSvg: '/Album Mágico/2/diosaEspiral.svg', video: '/Album Mágico/2/diosaEspiral.mp4', rarity: 'Común', description: 'Silueta femenina con una espiral en el vientre. Representa la fuerza generadora y la abundancia en constante crecimiento.' },
+            { id: 8, pageId: 2, slotNum: 3, title: 'El Loto', image: '/Album Mágico/2/elLoto.jpg', bgSvg: '/Album Mágico/2/elLoto.svg', video: '/Album Mágico/2/elLoto.mp4', rarity: 'Común', description: 'Representa el útero cósmico, la pureza divina femenina y el florecimiento del espíritu.' },
+            { id: 9, pageId: 2, slotNum: 4, title: 'El Pentagrama', image: '/Album Mágico/2/elPentagrama.jpg', bgSvg: '/Album Mágico/2/elPentagrama.svg', video: '/Album Mágico/2/elPentagrama.mp4', rarity: 'Común', description: 'Estrella de cinco puntas entrelazada que apunta hacia arriba. Representa los cinco elementos: Tierra, Aire, Fuego, Agua y el Espíritu.' },
+            { id: 10, pageId: 2, slotNum: 5, title: 'La Temperanza', image: '/Album Mágico/2/laTemperanza.jpg', bgSvg: '/Album Mágico/2/laTemperanza.svg', video: '/Album Mágico/2/laTemperanza.mp4', rarity: 'Común', description: 'La caricia curativa, el flujo de energías sutiles, el tantra y la mezcla fluida de auras y esencias.' }
+          ];
+
+          state = {
+            ...state,
+            pages: (state.pages || []).map(p => {
+              if (p.id === 2) {
+                return {
+                  ...p,
+                  title: 'Espiral de Loto',
+                  subtitle: 'Donde el espíritu florece y la energía sana.'
+                };
+              }
+              return p;
+            }),
+            slots: (state.slots || []).map(s => {
+              if (s.pageId === 2) {
+                const newData = page2SlotsData.find(d => d.slotNum === s.slotNum);
+                return newData ? { ...s, ...newData } : s;
+              }
+              return s;
+            }),
+            pendingPlacementCard: state.pendingPlacementCard && state.pendingPlacementCard.pageId === 2
+              ? (() => {
+                  const p = state.pendingPlacementCard;
+                  const newData = page2SlotsData.find(d => d.slotNum === p.slotNum);
+                  return newData ? { ...p, ...newData } : p;
+                })()
+              : state.pendingPlacementCard
+          };
+        }
+
         return state;
       },
-      version: 45,
+      version: 46,
     }
   )
 );
