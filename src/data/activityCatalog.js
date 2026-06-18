@@ -151,8 +151,8 @@ export const activityCatalog = [
     valueUnit: "vez",
     stars: 130,
     maxCompletions: 1,
-    intervalCompletions: 28,
-    intervalName: "al mes",
+    intervalCompletions: 1,
+    intervalName: "al día",
     activityDetails: "Realiza tus cobros o transacciones financieras pendientes.",
     phasePoints: 5
   },

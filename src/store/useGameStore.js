@@ -582,9 +582,22 @@ export const useGameStore = create(
           };
         }
 
+        if (version < 47) {
+          // Migración a versión 47: Forzar reinicio masivo del día
+          // Atrasamos las fechas al año 2000 para que cualquier fecha actual la sobrepase por completo.
+          state = {
+            ...state,
+            lastResetDate: '2000-01-01',
+            activities: (state.activities || []).map(a => ({
+              ...a,
+              periodStartDate: '2000-01-01'
+            }))
+          };
+        }
+
         return state;
       },
-      version: 46,
+      version: 47,
     }
   )
 );
