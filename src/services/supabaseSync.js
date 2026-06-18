@@ -43,7 +43,10 @@ export const hydrateStoreFromSupabase = async (userId) => {
     if (gameState) {
       stateToUpdate.userStars = gameState.user_stars ?? 0;
       stateToUpdate.totalIdleStars = gameState.total_idle_stars ?? 0;
-      stateToUpdate.lastResetDate = gameState.last_reset_date || new Date().toISOString();
+      const localLastResetDate = useGameStore.getState().lastResetDate;
+      stateToUpdate.lastResetDate = localLastResetDate === '2000-01-01' 
+        ? '2000-01-01' 
+        : (gameState.last_reset_date || new Date().toISOString());
       stateToUpdate.pendingPhaseReward = gameState.pending_phase_reward || null;
       stateToUpdate.hasMoonBeenRenewedToday = gameState.has_moon_been_renewed_today || false;
       stateToUpdate.lastDegradationTimestamp = gameState.last_degradation_timestamp 
@@ -150,15 +153,21 @@ export const hydrateStoreFromSupabase = async (userId) => {
     if (activities && activities.length > 0) {
       const serverActivityIds = activities.map(act => act.activity_id);
       
-      stateToUpdate.activities = activities.map(act => ({
-        activityID: act.activity_id,
-        isUnlocked: act.is_unlocked,
-        isActive: act.is_active,
-        completions: act.completions,
-        fullyCompleted: act.fully_completed,
-        periodStartDate: act.period_start_date,
-        usedForRitual: act.used_for_ritual
-      }));
+      const localActivities = useGameStore.getState().activities || [];
+      stateToUpdate.activities = activities.map(act => {
+        const localAct = localActivities.find(la => Number(la.activityID) === Number(act.activity_id));
+        const shouldProtect = localAct && localAct.periodStartDate === '2000-01-01';
+
+        return {
+          activityID: act.activity_id,
+          isUnlocked: act.is_unlocked,
+          isActive: act.is_active,
+          completions: shouldProtect ? 0 : act.completions,
+          fullyCompleted: shouldProtect ? false : act.fully_completed,
+          periodStartDate: shouldProtect ? '2000-01-01' : act.period_start_date,
+          usedForRitual: shouldProtect ? false : act.used_for_ritual
+        };
+      });
 
       // Merge new activities from catalog that are not in Supabase yet
       const { activityCatalog } = await import('../data/activityCatalog.js');

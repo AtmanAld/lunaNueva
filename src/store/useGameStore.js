@@ -582,9 +582,9 @@ export const useGameStore = create(
           };
         }
 
-        if (version < 47) {
-          // Migración a versión 47: Forzar reinicio masivo del día
-          // Atrasamos las fechas al año 2000 para que cualquier fecha actual la sobrepase por completo.
+        if (version < 48) {
+          // Migración a versión 48: Forzar reinicio masivo del día
+          // (Repetimos la lógica de la v47 porque Supabase la sobreescribió en dispositivos)
           state = {
             ...state,
             lastResetDate: '2000-01-01',
@@ -597,7 +597,7 @@ export const useGameStore = create(
 
         return state;
       },
-      version: 47,
+      version: 48,
     }
   )
 );

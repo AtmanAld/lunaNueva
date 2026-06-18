@@ -425,31 +425,31 @@ export const createDashboardSlice = (set, get) => ({
     set((state) => {
       const today = getLocalDateString();
 
-    // 1. Sincronizar nuevas actividades del catálogo que no estén en el estado
-    const existingIds = state.activities.map(a => a.activityID);
-    const newActivitiesFromCatalog = activityCatalog
-      .filter(ac => !existingIds.includes(ac.activityID))
-      .map(ac => ({
-        activityID: ac.activityID,
-        completions: 0,
-        fullyCompleted: false,
-        isUnlocked: true,
-        isActive: true,
-        usedForRitual: false,
-        periodStartDate: getLocalDateString()
-      }));
+      // 1. Sincronizar nuevas actividades del catálogo que no estén en el estado
+      const existingIds = state.activities.map(a => a.activityID);
+      const newActivitiesFromCatalog = activityCatalog
+        .filter(ac => !existingIds.includes(ac.activityID))
+        .map(ac => ({
+          activityID: ac.activityID,
+          completions: 0,
+          fullyCompleted: false,
+          isUnlocked: true,
+          isActive: true,
+          usedForRitual: false,
+          periodStartDate: getLocalDateString()
+        }));
 
-    let nextStateUpdates = {};
-    if (newActivitiesFromCatalog.length > 0) {
-      nextStateUpdates.activities = [...state.activities, ...newActivitiesFromCatalog];
-    }
+      let nextStateUpdates = {};
+      if (newActivitiesFromCatalog.length > 0) {
+        nextStateUpdates.activities = [...state.activities, ...newActivitiesFromCatalog];
+      }
 
-    // 2. Si hoy es cronológicamente después del último reset
-    if (isChronologicallyNewDay(state.lastResetDate, today)) {
-      // El dashboard ahora dependerá de estos booleanos para calcular su fondo
-      return { ...nextStateUpdates, isNewDay: true };
-    }
-    return { ...nextStateUpdates, isNewDay: false, isReviewDay: false };
+      // 2. Si hoy es cronológicamente después del último reset
+      if (isChronologicallyNewDay(state.lastResetDate, today)) {
+        // El dashboard ahora dependerá de estos booleanos para calcular su fondo
+        return { ...nextStateUpdates, isNewDay: true };
+      }
+      return { ...nextStateUpdates, isNewDay: false, isReviewDay: false };
     });
   },
   getLatestUnlockedPageStatus: () => {
@@ -494,8 +494,8 @@ export const createDashboardSlice = (set, get) => ({
         const storeItems = state.storeItems || [];
         const polvoItem = storeItems.find(i => i.id === 'polvo_lunar');
         const polvoPrice = polvoItem ? polvoItem.price : 180;
-        
-        const cost = needed * polvoPrice; 
+
+        const cost = needed * polvoPrice;
         state.updateStars(-cost);
         set({
           albumItems: {
