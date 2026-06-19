@@ -93,7 +93,8 @@ export const createStoreSlice = (set, get) => ({
       chips: ['Nivel 1', 'Divierte 10 horas'],
       payload: { targetsNeed: 'play', amount: 10, quantity: 1, rewardStars: 4, idleReward: 2 }
     },
-    { id: 'polvo_lunar', name: 'Polvo Lunar', icon: '✨', price: 180, category: 'Magia', description: 'Polvo mágico para desbloquear casillas especiales o nuevas páginas.', chips: ['Premium', '1 uso', 'Funcional'], payload: { type: 'UNLOCK_TOOL' } }
+    { id: 'polvo_lunar', name: 'Polvo Lunar', icon: '✨', price: 180, category: 'Magia', description: 'Polvo mágico para desbloquear casillas especiales o nuevas páginas.', chips: ['Premium', '1 uso', 'Funcional'], payload: { type: 'UNLOCK_TOOL' } },
+    { id: 'reloj_cosmico', name: 'Reloj Cósmico', icon: '⏳', price: 50, category: 'Magia', description: 'Retrocede el tiempo del universo para forzar un nuevo día inmediatamente.', chips: ['Poder Cósmico', '1 uso', 'Límite 4/mes'], payload: { type: 'TIME_TRAVEL' } }
   ],
   purchaseItem: (productId, quantity = 1) => {
     const state = get();
@@ -130,7 +131,13 @@ export const createStoreSlice = (set, get) => ({
       }
     };
 
-    if (product.category === 'Mascota') {
+    if (product.payload?.type === 'TIME_TRAVEL') {
+      set((s) => ({
+        lastResetDate: '2000-01-01',
+        activities: (s.activities || []).map(a => ({ ...a, periodStartDate: '2000-01-01' }))
+      }));
+      state.setEphemeralMessage("TIME_TRAVEL_SUCCESS");
+    } else if (product.category === 'Mascota') {
       state.addPetItem(purchasedProduct);
       state.setEphemeralMessage("SPIRAL_FELIZ");
     } else if (product.category === 'Magia') {

@@ -32,6 +32,23 @@ export function StorePage() {
   // --- MOTOR DE MENSAJES ---
   const activeMessage = useGameStore(state => selectActiveMessage(state, 'store'));
 
+  // --- LÍMITES TEMPORALES (Opción 1: LocalStorage Nativo) ---
+  const [timeTravelLimits, setTimeTravelLimits] = useState(() => {
+    try {
+      const saved = localStorage.getItem('timeTravelLimits');
+      const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.month === currentMonth) {
+          return parsed;
+        }
+      }
+      return { month: currentMonth, count: 0 };
+    } catch {
+      return { month: new Date().toISOString().slice(0, 7), count: 0 };
+    }
+  });
+
   // Mapeo de catálogo de Zustand al formato visual
   const mappedCatalog = (catalog || []).map(item => ({
     ...item,
@@ -40,9 +57,13 @@ export function StorePage() {
 
   const allItems = [...mappedCatalog];
 
-  // 1. FILTRAR CATEGORÍAS VACÍAS
+  // 1. FILTRAR CATEGORÍAS VACÍAS Y LÍMITES
   const availableCategories = (storeCategories || []).filter(cat =>
-    allItems.some(item => item.category === cat)
+    allItems.some(item => {
+      if (item.category !== cat) return false;
+      if (item.payload?.type === 'TIME_TRAVEL' && timeTravelLimits.count >= 4) return false;
+      return true;
+    })
   );
 
   // 2. Asegurarnos que la categoría activa sea válida (si la actual desaparece)
@@ -50,7 +71,12 @@ export function StorePage() {
     ? activeCategory
     : availableCategories[0] || 'Mascota';
 
-  const filteredItems = allItems.filter(item => item.category === safeActiveCategory);
+  const filteredItems = allItems.filter(item => {
+    if (item.category !== safeActiveCategory) return false;
+    // Ocultar si llegó al límite
+    if (item.payload?.type === 'TIME_TRAVEL' && timeTravelLimits.count >= 4) return false;
+    return true;
+  });
 
   // Sincronizar la categoría si el modal global se abre y tiene un producto
   useEffect(() => {
@@ -78,6 +104,12 @@ export function StorePage() {
     if (globalStars >= totalPrice) {
       purchaseItem(selectedProduct.id, purchaseQuantity);
       
+      if (selectedProduct.payload?.type === 'TIME_TRAVEL') {
+        const newLimits = { ...timeTravelLimits, count: timeTravelLimits.count + purchaseQuantity };
+        setTimeTravelLimits(newLimits);
+        localStorage.setItem('timeTravelLimits', JSON.stringify(newLimits));
+      }
+
       // Si el usuario quiere regresar automagicamente a Spiral:
       if (isDirectFlight) {
         navigate('/spiral');

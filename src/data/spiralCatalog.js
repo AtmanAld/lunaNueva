@@ -485,6 +485,16 @@ export const spiralCatalog = {
     ]
   },
 
+  "TIME_TRAVEL_SUCCESS": {
+    priority: 3,
+    text: [
+      "¡Magia temporal activada! He rebobinado el universo. Ve al Dashboard para amanecer de nuevo, meow. ⏳✨"
+    ],
+    video: "assets/videos/spiral_message.mp4",
+    duration: 5000,
+    actionConfig: []
+  },
+
   "REVIEW_DAY_WAITING": {
     priority: 2,
     text: [
