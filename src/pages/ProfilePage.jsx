@@ -6,6 +6,7 @@ import { SpiralMessage } from '../components/ui/SpiralMessage';
 import { PageDepthWrapper, ActionModalOverlay } from '../components/ui/InteractiveModalSystem';
 import { Settings, Pencil, Star, Wallet, Moon, BookOpen, Check, Undo2, Image, CloudUpload, Droplet, Cookie, Bath, Gamepad2, LogOut } from 'lucide-react';
 import { supabase } from '../supabaseclient';
+import { ALBUM_PAGES, ALBUM_SLOTS } from '../data/albumCatalog';
 
 // --- ZUSTAND STORE ---
 import { useGameStore } from '../store/useGameStore';
@@ -77,7 +78,13 @@ export function ProfilePage() {
 
   const userLevel = useGameStore(state => state.userLevel);
   const statistics = useGameStore(state => state.statistics);
-  const globalPages = useGameStore(state => state.pages);
+  const unlockedPages = useGameStore(state => state.unlockedPages || [1]);
+  const pageRewardStates = useGameStore(state => state.pageRewardStates || {});
+  const globalPages = ALBUM_PAGES.map(p => ({
+    ...p,
+    state: unlockedPages.includes(p.id) ? 'unlocked' : 'locked',
+    rewardState: pageRewardStates[p.id] || 'default'
+  }));
   const needs = useGameStore(state => state.needs);
 
   const petNeeds = [
@@ -310,20 +317,18 @@ export function ProfilePage() {
               variant="none"
               onClick={() => {
                 const currentPage = useGameStore.getState().albumPage || 1;
-                useGameStore.getState().setRewardState(currentPage, 'default');
+                const pageRewardStates = { ...useGameStore.getState().pageRewardStates };
+                pageRewardStates[currentPage] = 'default';
+                
                 useGameStore.getState().resetRitualState();
 
-                // Vaciar slots de la página actual y dejar pendingPlacementCard en null (cero tarjetas en mano)
-                const currentSlots = useGameStore.getState().slots || [];
-                const updatedSlots = currentSlots.map(s => {
-                  if (s.pageId === currentPage) {
-                    return { ...s, state: 'empty' };
-                  }
-                  return s;
-                });
+                // Vaciar slots de la página actual en filledSlots y dejar pendingPlacementCard en null
+                const slotsOfPage = ALBUM_SLOTS.filter(s => s.pageId === currentPage).map(s => s.id);
+                const filledSlots = (useGameStore.getState().filledSlots || []).filter(id => !slotsOfPage.includes(id));
 
                 useGameStore.setState({
-                  slots: updatedSlots,
+                  pageRewardStates,
+                  filledSlots,
                   pendingPlacementCard: null
                 });
 
@@ -391,9 +396,15 @@ export function ProfilePage() {
                     key={num}
                     variant="none"
                     onClick={() => {
-                      const slot = useGameStore.getState().slots.find(s => s.pageId === 1 && s.slotNum === num);
+                      const slot = ALBUM_SLOTS.find(s => s.pageId === 1 && s.slotNum === num);
                       if (slot) {
-                        useGameStore.setState({ pendingPlacementCard: slot });
+                        useGameStore.setState({
+                          pendingPlacementCard: {
+                            id: slot.id,
+                            pageId: slot.pageId,
+                            slotNum: slot.slotNum
+                          }
+                        });
                         alert(`¡Carta ${num} (${slot.title}) en mano! Ve al álbum para colocarla.`);
                       }
                     }}
@@ -407,12 +418,13 @@ export function ProfilePage() {
                 variant="none"
                 onClick={() => {
                   const currentPage = useGameStore.getState().albumPage || 1;
-                  const slots = useGameStore.getState().slots;
-                  // Llenar los slots de la página actual
-                  const updatedSlots = slots.map(s => s.pageId === currentPage ? { ...s, state: 'filled' } : s);
-                  useGameStore.setState({ slots: updatedSlots });
-                  // Resetear el estado de cobro para que isRitualReady vuelva a ser true
-                  useGameStore.getState().setRewardState(currentPage, 'default');
+                  const slotsOfPage = ALBUM_SLOTS.filter(s => s.pageId === currentPage).map(s => s.id);
+                  const filledSlots = Array.from(new Set([...(useGameStore.getState().filledSlots || []), ...slotsOfPage]));
+
+                  const pageRewardStates = { ...useGameStore.getState().pageRewardStates };
+                  pageRewardStates[currentPage] = 'default';
+
+                  useGameStore.setState({ filledSlots, pageRewardStates });
                   useGameStore.getState().resetRitualState();
 
                   alert(`¡Todas las cartas de la Página ${currentPage} están llenas! Ve al álbum para ver el ritual.`);

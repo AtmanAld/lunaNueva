@@ -1,5 +1,6 @@
 import { activityCatalog, activitySetsCatalog } from '../../data/activityCatalog';
 import { getLocalDateString, isChronologicallyNewDay, calculateDaysDifference } from '../../utils/dateUtils';
+import { ALBUM_PAGES, ALBUM_SLOTS } from '../../data/albumCatalog';
 
 export const createDashboardSlice = (set, get) => ({
   moonPhase: {
@@ -238,44 +239,42 @@ export const createDashboardSlice = (set, get) => ({
     // Si ya hay una carta pendiente de colocar, no permitimos reclamar otra
     // para evitar el edge case de sobreescritura y pérdida de la carta vieja.
     if (state.pendingPlacementCard) {
-      state.setSpiralMessage("PENDING_PLACEMENT_WARNING", { title: state.pendingPlacementCard.title });
+      const catalogSlot = ALBUM_SLOTS.find(s => s.pageId === state.pendingPlacementCard.pageId && s.slotNum === state.pendingPlacementCard.slotNum);
+      state.setSpiralMessage("PENDING_PLACEMENT_WARNING", { title: catalogSlot?.title || "Carta" });
       return;
     }
 
     // Utiliza la última página desbloqueada en lugar de la que estaba mirando la usuaria
     const { pageId: activePageId } = get().getLatestUnlockedPageStatus();
-    const activePage = state.pages.find(p => p.id === activePageId);
 
     // 1. Obtener slots de la página activa
-    const pageSlots = state.slots.filter(s => s.pageId === activePageId);
+    const pageSlots = ALBUM_SLOTS.filter(s => s.pageId === activePageId);
     const commonSlots = pageSlots.filter(s => s.slotNum >= 2 && s.slotNum <= 5);
-    const filledCommonSlots = commonSlots.filter(s => s.state === 'filled');
+    const filledCommonSlots = commonSlots.filter(s => (state.filledSlots || []).includes(s.id));
 
     let selectedSlot = null;
     const allCommonsFilled = filledCommonSlots.length === 4;
 
     if (allCommonsFilled) {
       const specialSlot = pageSlots.find(s => s.slotNum === 1);
-      if (specialSlot && specialSlot.state === 'empty') {
+      if (specialSlot && !(state.filledSlots || []).includes(specialSlot.id)) {
         selectedSlot = specialSlot;
       }
     } else {
-      const emptyCommons = commonSlots.filter(s => s.state === 'empty');
+      const emptyCommons = commonSlots.filter(s => !(state.filledSlots || []).includes(s.id));
       if (emptyCommons.length > 0) {
         const randomIndex = Math.floor(Math.random() * emptyCommons.length);
         selectedSlot = emptyCommons[randomIndex];
       }
     }
 
+    if (!selectedSlot) return;
+
     // Si sí hay un slot para colocar la tarjeta
     const pendingCard = {
+      id: selectedSlot.id,
       pageId: selectedSlot.pageId,
-      slotNum: selectedSlot.slotNum,
-      title: selectedSlot.title,
-      image: selectedSlot.image,
-      bgSvg: selectedSlot.bgSvg,
-      rarity: selectedSlot.rarity,
-      video: selectedSlot.video
+      slotNum: selectedSlot.slotNum
     };
 
     const updatedActivities = state.activities.map(a => {
@@ -300,7 +299,7 @@ export const createDashboardSlice = (set, get) => ({
       }
     });
 
-    state.setSpiralMessage("MOON_REWARD_CLAIMED_NEW", { title: pendingCard.title });
+    state.setSpiralMessage("MOON_REWARD_CLAIMED_NEW", { title: selectedSlot.title });
   },
   resetMoonAfterClaim: () => {
     const state = get();
@@ -454,11 +453,10 @@ export const createDashboardSlice = (set, get) => ({
   },
   getLatestUnlockedPageStatus: () => {
     const state = get();
-    const unlockedPages = state.pages.filter(p => p.state === 'unlocked');
-    const latestPage = unlockedPages[unlockedPages.length - 1];
-    const pageId = latestPage ? latestPage.id : 1;
-    const slots = state.slots.filter(s => s.pageId === pageId);
-    const isFull = slots.length > 0 && slots.every(s => s.state === 'filled');
+    const unlocked = state.unlockedPages || [1];
+    const pageId = unlocked[unlocked.length - 1] || 1;
+    const slotsOfPage = ALBUM_SLOTS.filter(s => s.pageId === pageId);
+    const isFull = slotsOfPage.length > 0 && slotsOfPage.every(s => (state.filledSlots || []).includes(s.id));
     return { isFull, pageId };
   },
 

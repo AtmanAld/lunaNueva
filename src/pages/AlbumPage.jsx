@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../components/ui/Button';
@@ -13,18 +13,43 @@ import { PageDepthWrapper, ActionModalOverlay } from '../components/ui/Interacti
 import { useGameStore } from '../store/useGameStore';
 import { selectActiveMessage } from '../store/slices/createMessageSlice';
 import { spiralCatalog } from '../data/spiralCatalog';
+import { ALBUM_PAGES, ALBUM_SLOTS } from '../data/albumCatalog';
 
 export function AlbumPage() {
   // --- ZUSTAND STORE ---
   const currentPage = useGameStore(state => state.albumPage || 1);
   const setCurrentPage = useGameStore(state => state.setAlbumPage);
-  const pendingPlacementCard = useGameStore(state => state.pendingPlacementCard);
+  const pendingPlacementCardRaw = useGameStore(state => state.pendingPlacementCard);
   const placePendingCard = useGameStore(state => state.placePendingCard);
-  const globalSlots = useGameStore(state => state.slots);
-  const globalPages = useGameStore(state => state.pages);
+  const unlockedPages = useGameStore(state => state.unlockedPages || [1]);
+  const pageRewardStates = useGameStore(state => state.pageRewardStates || {});
+  const filledSlots = useGameStore(state => state.filledSlots || []);
   const unlockPage = useGameStore(state => state.unlockPage);
   const claimReward = useGameStore(state => state.claimReward);
-  const setRewardState = useGameStore(state => state.setRewardState);
+
+  // Derive globalPages equivalent
+  const globalPages = useMemo(() => {
+    return ALBUM_PAGES.map(p => ({
+      ...p,
+      state: unlockedPages.includes(p.id) ? 'unlocked' : 'locked',
+      rewardState: pageRewardStates[p.id] || 'default'
+    }));
+  }, [unlockedPages, pageRewardStates]);
+
+  // Derive globalSlots equivalent
+  const globalSlots = useMemo(() => {
+    return ALBUM_SLOTS.map(s => ({
+      ...s,
+      state: filledSlots.includes(s.id) ? 'filled' : 'empty'
+    }));
+  }, [filledSlots]);
+
+  // Derive pendingPlacementCard with full details from the catalog
+  const pendingPlacementCard = useMemo(() => {
+    if (!pendingPlacementCardRaw) return null;
+    const catalogSlot = ALBUM_SLOTS.find(s => s.pageId === pendingPlacementCardRaw.pageId && s.slotNum === pendingPlacementCardRaw.slotNum);
+    return catalogSlot ? { ...catalogSlot, ...pendingPlacementCardRaw } : null;
+  }, [pendingPlacementCardRaw]);
   
   // -- Message Engine Hooks --
   const enqueueMessage = useGameStore(state => state.enqueueMessage);

@@ -1,5 +1,6 @@
 import { supabase } from '../supabaseclient';
 import { useGameStore } from '../store/useGameStore';
+import { ALBUM_PAGES } from '../data/albumCatalog';
 
 let syncSubscription = null;
 let debounceTimer = null;
@@ -43,10 +44,7 @@ export const hydrateStoreFromSupabase = async (userId) => {
     if (gameState) {
       stateToUpdate.userStars = gameState.user_stars ?? 0;
       stateToUpdate.totalIdleStars = gameState.total_idle_stars ?? 0;
-      const localLastResetDate = useGameStore.getState().lastResetDate;
-      stateToUpdate.lastResetDate = localLastResetDate === '2000-01-01' 
-        ? '2000-01-01' 
-        : (gameState.last_reset_date || new Date().toISOString());
+      stateToUpdate.lastResetDate = gameState.last_reset_date || new Date().toISOString();
       stateToUpdate.pendingPhaseReward = gameState.pending_phase_reward || null;
       stateToUpdate.hasMoonBeenRenewedToday = gameState.has_moon_been_renewed_today || false;
       stateToUpdate.lastDegradationTimestamp = gameState.last_degradation_timestamp 
@@ -153,19 +151,15 @@ export const hydrateStoreFromSupabase = async (userId) => {
     if (activities && activities.length > 0) {
       const serverActivityIds = activities.map(act => act.activity_id);
       
-      const localActivities = useGameStore.getState().activities || [];
       stateToUpdate.activities = activities.map(act => {
-        const localAct = localActivities.find(la => Number(la.activityID) === Number(act.activity_id));
-        const shouldProtect = localAct && localAct.periodStartDate === '2000-01-01';
-
         return {
           activityID: act.activity_id,
           isUnlocked: act.is_unlocked,
           isActive: act.is_active,
-          completions: shouldProtect ? 0 : act.completions,
-          fullyCompleted: shouldProtect ? false : act.fully_completed,
-          periodStartDate: shouldProtect ? '2000-01-01' : act.period_start_date,
-          usedForRitual: shouldProtect ? false : act.used_for_ritual
+          completions: act.completions,
+          fullyCompleted: act.fully_completed,
+          periodStartDate: act.period_start_date,
+          usedForRitual: act.used_for_ritual
         };
       });
 
@@ -188,30 +182,24 @@ export const hydrateStoreFromSupabase = async (userId) => {
 
     // 8. Album Pages
     if (album && album.length > 0) {
-      // Frontend expects `id`, `state` ('locked'/'unlocked'), `rewardState`
-      // We must merge with existing pages array to not lose static title/images
-      const currentPages = useGameStore.getState().pages || [];
-      stateToUpdate.pages = currentPages.map(cp => {
-         const serverPage = album.find(a => a.page_number === cp.id);
-         if (serverPage) {
-           return {
-             ...cp,
-             state: serverPage.is_unlocked ? 'unlocked' : 'locked',
-             rewardState: serverPage.reward_state || 'default'
-           };
-         }
-         return cp;
+      const unlockedPages = [];
+      const pageRewardStates = {};
+      album.forEach(a => {
+        if (a.is_unlocked) {
+          unlockedPages.push(a.page_number);
+        }
+        pageRewardStates[a.page_number] = a.reward_state || 'default';
       });
+      if (!unlockedPages.includes(1)) {
+        unlockedPages.push(1);
+      }
+      stateToUpdate.unlockedPages = Array.from(new Set(unlockedPages));
+      stateToUpdate.pageRewardStates = pageRewardStates;
     }
 
     // 9. Album Slots
     if (albumSlots) {
-      const serverSlotIds = albumSlots.map(s => s.slot_id);
-      const currentSlots = useGameStore.getState().slots || [];
-      stateToUpdate.slots = currentSlots.map(slot => ({
-         ...slot,
-         state: serverSlotIds.includes(slot.id) ? 'filled' : 'empty'
-      }));
+      stateToUpdate.filledSlots = albumSlots.map(s => s.slot_id);
     }
 
     // Inject into Zustand
@@ -329,25 +317,24 @@ export const startSupabaseSync = (userId) => {
         }
 
         // 8. Album Pages
-        if (state.pages && state.pages.length > 0) {
+        if (state.unlockedPages && state.unlockedPages.length > 0) {
           await supabase.from('album').delete().eq('user_id', userId);
-          const albumPagesToInsert = state.pages.map(p => ({
+          const albumPagesToInsert = ALBUM_PAGES.map(p => ({
             user_id: userId,
             page_number: p.id,
-            is_unlocked: p.state === 'unlocked',
-            reward_state: p.rewardState || 'default'
+            is_unlocked: state.unlockedPages.includes(p.id),
+            reward_state: state.pageRewardStates?.[p.id] || 'default'
           }));
           await supabase.from('album').insert(albumPagesToInsert);
         }
 
         // 9. Album Slots
-        if (state.slots && state.slots.length > 0) {
+        if (state.filledSlots) {
           await supabase.from('album_slots').delete().eq('user_id', userId);
-          const filledSlots = state.slots.filter(s => s.state === 'filled');
-          if (filledSlots.length > 0) {
-            const slotsToInsert = filledSlots.map(s => ({
+          if (state.filledSlots.length > 0) {
+            const slotsToInsert = state.filledSlots.map(slotId => ({
               user_id: userId,
-              slot_id: s.id
+              slot_id: slotId
             }));
             await supabase.from('album_slots').insert(slotsToInsert);
           }

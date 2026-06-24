@@ -20,6 +20,7 @@ import { selectActiveMessage } from '../store/slices/createMessageSlice';
 import { spiralCatalog } from '../data/spiralCatalog';
 import { activityCatalog } from '../data/activityCatalog';
 import { getLocalDateString, isChronologicallyNewDay } from '../utils/dateUtils';
+import { ALBUM_SLOTS } from '../data/albumCatalog';
 
 // --- AUXILIARY COMPONENT FOR THE MATHEMATICAL MOON PLACEHOLDER (PREPARED FOR VIDEO WRAPPER) ---
 function DynamicMoon({ progress, phaseName, celebrationActive, onAnimationStateChange }) {
@@ -176,7 +177,12 @@ export function DashboardPage() {
   const verifyGameState = useGameStore(state => state.verifyGameState);
   const pendingPhaseReward = useGameStore(state => state.pendingPhaseReward);
   const clearPendingPhaseReward = useGameStore(state => state.clearPendingPhaseReward);
-  const pendingPlacementCard = useGameStore(state => state.pendingPlacementCard);
+  const pendingPlacementCardRaw = useGameStore(state => state.pendingPlacementCard);
+  const pendingPlacementCard = useMemo(() => {
+    if (!pendingPlacementCardRaw) return null;
+    const catalogSlot = ALBUM_SLOTS.find(s => s.pageId === pendingPlacementCardRaw.pageId && s.slotNum === pendingPlacementCardRaw.slotNum);
+    return catalogSlot ? { ...catalogSlot, ...pendingPlacementCardRaw } : null;
+  }, [pendingPlacementCardRaw]);
   const updateStars = useGameStore(state => state.updateStars);
   const useMoonDust = useGameStore(state => state.useMoonDust);
   const polvoLunarCount = useGameStore(state => state.albumItems?.polvo_lunar || 0);

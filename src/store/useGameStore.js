@@ -496,10 +496,10 @@ export const useGameStore = create(
             }),
             pendingPlacementCard: state.pendingPlacementCard && state.pendingPlacementCard.pageId === 2
               ? (() => {
-                  const p = state.pendingPlacementCard;
-                  const newData = page2SlotsData.find(d => d.slotNum === p.slotNum);
-                  return newData ? { ...p, ...newData } : p;
-                })()
+                const p = state.pendingPlacementCard;
+                const newData = page2SlotsData.find(d => d.slotNum === p.slotNum);
+                return newData ? { ...p, ...newData } : p;
+              })()
               : state.pendingPlacementCard
           };
         }
@@ -535,10 +535,10 @@ export const useGameStore = create(
             }),
             pendingPlacementCard: state.pendingPlacementCard && state.pendingPlacementCard.pageId === 3
               ? (() => {
-                  const p = state.pendingPlacementCard;
-                  const newData = page3SlotsData.find(d => d.slotNum === p.slotNum);
-                  return newData ? { ...p, ...newData } : p;
-                })()
+                const p = state.pendingPlacementCard;
+                const newData = page3SlotsData.find(d => d.slotNum === p.slotNum);
+                return newData ? { ...p, ...newData } : p;
+              })()
               : state.pendingPlacementCard
           };
         }
@@ -574,10 +574,10 @@ export const useGameStore = create(
             }),
             pendingPlacementCard: state.pendingPlacementCard && state.pendingPlacementCard.pageId === 2
               ? (() => {
-                  const p = state.pendingPlacementCard;
-                  const newData = page2SlotsData.find(d => d.slotNum === p.slotNum);
-                  return newData ? { ...p, ...newData } : p;
-                })()
+                const p = state.pendingPlacementCard;
+                const newData = page2SlotsData.find(d => d.slotNum === p.slotNum);
+                return newData ? { ...p, ...newData } : p;
+              })()
               : state.pendingPlacementCard
           };
         }
@@ -595,9 +595,75 @@ export const useGameStore = create(
           };
         }
 
+        if (version < 49) {
+          // Migración a versión 49: Corregir nombres de archivos SVG en slots y pendingPlacementCard (reemplazar "SVG.svg" por ".svg")
+          state = {
+            ...state,
+            slots: (state.slots || []).map(s => ({
+              ...s,
+              bgSvg: s.bgSvg ? s.bgSvg.replace(/SVG\.svg$/i, '.svg') : s.bgSvg
+            })),
+            pendingPlacementCard: state.pendingPlacementCard ? {
+              ...state.pendingPlacementCard,
+              bgSvg: state.pendingPlacementCard.bgSvg ? state.pendingPlacementCard.bgSvg.replace(/SVG\.svg$/i, '.svg') : state.pendingPlacementCard.bgSvg
+            } : null
+          };
+        }
+
+        if (version < 50) {
+          // Migración a versión 50: Desacoplar estado estático (pages/slots) a variables de progreso ligeras
+          const unlockedPages = [];
+          if (state.pages) {
+            state.pages.forEach(p => {
+              if (p.state === 'unlocked') {
+                unlockedPages.push(p.id);
+              }
+            });
+          }
+          if (unlockedPages.length === 0) {
+            unlockedPages.push(1);
+          }
+
+          const pageRewardStates = {};
+          if (state.pages) {
+            state.pages.forEach(p => {
+              pageRewardStates[p.id] = p.rewardState || 'default';
+            });
+          }
+
+          const filledSlots = [];
+          if (state.slots) {
+            state.slots.forEach(s => {
+              if (s.state === 'filled') {
+                filledSlots.push(s.id);
+              }
+            });
+          }
+
+          let pendingPlacementCard = null;
+          if (state.pendingPlacementCard) {
+            pendingPlacementCard = {
+              id: state.pendingPlacementCard.id,
+              pageId: state.pendingPlacementCard.pageId,
+              slotNum: state.pendingPlacementCard.slotNum
+            };
+          }
+
+          state = {
+            ...state,
+            unlockedPages,
+            pageRewardStates,
+            filledSlots,
+            pendingPlacementCard
+          };
+
+          delete state.pages;
+          delete state.slots;
+        }
+
         return state;
       },
-      version: 48,
+      version: 50,
     }
   )
 );
