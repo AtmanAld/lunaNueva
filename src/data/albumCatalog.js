@@ -2,26 +2,22 @@ export const ALBUM_PAGES = [
   {
     id: 1,
     title: 'Le Saut de la Lune',
-    subtitle: 'Donde el destino teje y el deseo danza.',
-    headerBg: '/Album Mágico/1/headerBG.jpg'
+    subtitle: 'Donde el destino teje y el deseo danza.'
   },
   {
     id: 2,
     title: 'Espiral de Loto',
-    subtitle: 'Donde el espíritu florece y la energía sana.',
-    headerBg: '/Album Mágico/2/headerBG.jpg'
+    subtitle: 'Donde el espíritu florece y la energía sana.'
   },
   {
     id: 3,
     title: 'Venus oculta',
-    subtitle: 'Equilibrio, belleza y dominio instintivo.',
-    headerBg: '/Album Mágico/3/headerBG.jpg'
+    subtitle: 'Equilibrio, belleza y dominio instintivo.'
   },
   {
     id: 4,
-    title: 'Nebulosas de Ensueño',
-    subtitle: 'Colección Especial 2025',
-    headerBg: '/Album Mágico/4/headerBG.jpg'
+    title: 'Tríada Cósmica',
+    subtitle: 'Riqueza material, fertilidad y placer compartido.'
   }
 ];
 
@@ -47,10 +43,10 @@ export const ALBUM_SLOTS = [
   { id: 14, pageId: 3, slotNum: 4, title: 'Venus', image: '/Album Mágico/3/simboloVenus.jpg', bgSvg: '/Album Mágico/3/simboloVenus.svg', video: '/Album Mágico/3/simboloVenus.mp4', rarity: 'Común', description: 'Representa lo femenino, la atracción, el lujo, el amor, la belleza y la abundancia terrenal.' },
   { id: 15, pageId: 3, slotNum: 5, title: 'Tarot de Marsella: Le Chariot', image: '/Album Mágico/3/leChariot.jpg', bgSvg: '/Album Mágico/3/leChariot.svg', video: '/Album Mágico/3/leChariot.mp4', rarity: 'Común', description: 'La conquista del placer, el avance apasionado y el dominio instintivo sobre la propia sexualidad.' },
 
-  // Página 4 (Nebulosas de Ensueño)
-  { id: 16, pageId: 4, slotNum: 1, title: 'Nebulosa Madre', image: '/Album Mágico/1/crecienteLunar.jpg', bgSvg: '/Album Mágico/1/crecienteLunar.svg', rarity: 'Especial', description: '' },
-  { id: 17, pageId: 4, slotNum: 2, title: 'Polvo de Cometa', image: '/Album Mágico/1/escobaDeBruja.jpg', bgSvg: '/Album Mágico/1/escobaDeBruja.svg', rarity: 'Común', description: '' },
-  { id: 18, pageId: 4, slotNum: 3, title: 'Estrella Binaria', image: '/Album Mágico/1/elGato.jpg', bgSvg: '/Album Mágico/1/elGato.svg', rarity: 'Común', description: '' },
-  { id: 19, pageId: 4, slotNum: 4, title: 'Agujero de Gusano', image: '/Album Mágico/1/laArana.jpg', bgSvg: '/Album Mágico/1/laArana.svg', rarity: 'Común', description: '' },
-  { id: 20, pageId: 4, slotNum: 5, title: 'Constelación Fénix', image: '/Album Mágico/1/leMat.jpg', bgSvg: '/Album Mágico/1/leMat.svg', rarity: 'Común', description: '' }
+  // Página 4 (Tríada Cósmica)
+  { id: 16, pageId: 4, slotNum: 1, title: 'Tarot de Marsella: Tres de Copas', image: '/Album Mágico/4/tresCopas.jpg', bgSvg: '/Album Mágico/4/tresCopas.svg', video: '/Album Mágico/4/tresCopas.mp4', rarity: 'Especial', description: 'La danza entre tres mujeres, la sororidad sensual, la celebración del placer colectivo y la risa compartida.' },
+  { id: 17, pageId: 4, slotNum: 2, title: 'Runa Fehu', image: '/Album Mágico/4/runaFehu.jpg', bgSvg: '/Album Mágico/4/runaFehu.svg', video: '/Album Mágico/4/runaFehu.mp4', rarity: 'Común', description: 'Runa que significa literalmente ganado. Es el máximo símbolo nórdico para atraer riqueza material, dinero y abundancia.' },
+  { id: 18, pageId: 4, slotNum: 3, title: 'Triángulo de la Manifestación', image: '/Album Mágico/4/trianguloManifestacion.jpg', bgSvg: '/Album Mágico/4/trianguloManifestacion.svg', video: '/Album Mágico/4/trianguloManifestacion.mp4', rarity: 'Común', description: 'Triángulos que representan Fuego, Aire, Agua y Tierra, claves para manifestar la magia.' },
+  { id: 19, pageId: 4, slotNum: 4, title: 'El Cáliz', image: '/Album Mágico/4/elCaliz.jpg', bgSvg: '/Album Mágico/4/elCaliz.svg', video: '/Album Mágico/4/elCaliz.mp4', rarity: 'Común', description: 'Representa el elemento Agua, la receptividad femenina, el vientre materno y la abundancia emocional e intuitiva.' },
+  { id: 20, pageId: 4, slotNum: 5, title: 'El Conejo Lunar', image: '/Album Mágico/4/conejoLunar.jpg', bgSvg: '/Album Mágico/4/conejoLunar.svg', video: '/Album Mágico/4/conejoLunar.mp4', rarity: 'Común', description: 'Animal nocturno ligado a la luna, reconocido por su fertilidad extrema y abundancia rápida.' }
 ];
